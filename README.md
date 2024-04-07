@@ -74,5 +74,4 @@ This can be installed manually or through HACS
 I use this fork in my own home assistant to add some custom modifications and changes, not (yet) reflected in the original form from Olen.
 
 <a href="https://www.buymeacoffee.com/cybdis" target="_blank">
-  <img src="/bmc-yellow-button.png" height="50px"/>
-</a>
+  <img src="https://raw.githubusercontent.com/CybDis/CybDis/main/bmc-yellow-button.png" height="50px"/></a>
