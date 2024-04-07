@@ -13,6 +13,8 @@ You can also select what bars you want to show for each card
 ```yaml
 type: custom:flower-card
 entity: plant.my_plant
+name: My Plant
+hide_species: false
 show_bars:
 - illuminance
 - humidity
@@ -69,8 +71,8 @@ This can be installed manually or through HACS
 
 
 ### Disclaimer
-I looked into several forks of the original card https://github.com/thomasloven/lovelace-flower-card. Some forks were very interesting and I edited several of those source codes changes into my own new fork. Credits to those original authors. After version 3.0.0 the card was more or less completely rewritten, and only the design and layout of the original card has been kept.
+I use this fork in my own home assistant to add some custom modifications and changes, not (yet) reflected in the original form from Olen.
 
-<a href="https://www.buymeacoffee.com/olatho" target="_blank">
-<img src="https://user-images.githubusercontent.com/203184/184674974-db7b9e53-8c5a-40a0-bf71-c01311b36b0a.png" style="height: 50px !important;"> 
+<a href="https://www.buymeacoffee.com/cybdis" target="_blank">
+  <img src="/bmc-yellow-button.png" height="50px"/>
 </a>
