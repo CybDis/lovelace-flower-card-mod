@@ -105,7 +105,7 @@
             <ha-card class="${r}">
             <div class="${i}" @click="${()=>(0,d.moreInfo)(this,this.stateObj.entity_id)}">
                 <img src="${this.stateObj.attributes.entity_picture?this.stateObj.attributes.entity_picture:u.missingImage}">
-                <span id="name"> ${this.stateObj.attributes.name} <ha-icon .icon="mdi:${"problem"==this.stateObj.state.toLowerCase()?"alert-circle-outline":""}"></ha-icon>
+                <span id="name"> ${this.config.name} <ha-icon .icon="mdi:${"problem"==this.stateObj.state.toLowerCase()?"alert-circle-outline":""}"></ha-icon>
                 </span>
                 <span id="battery">${(0,c.renderBattery)(this.config,this._hass)}</span>
                 ${e?"":o.html`<span id="species">${t} </span>`}
