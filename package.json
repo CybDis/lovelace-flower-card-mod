@@ -11,7 +11,7 @@
   "module": "flower-card.js",
   "license": "MIT",
   "dependencies": {
-    "@marcokreeft/ha-editor-formbuilder": "^2023.10.6",
+    "@babel/preset-env": "^7.24.4",
     "babel-loader": "^9.1.3",
     "compression-webpack-plugin": "^10.0.0",
     "custom-card-helpers": "^1.9.0",
