@@ -1,7 +1,7 @@
-# Flower Card
+# Flower Card (Mod)
 
-**This fork of the flower-card depends on this Plant component:
-https://github.com/Olen/homeassistant-plant**
+**This fork of the flower-card** (_originally by Olen_) depends on this Plant component:  
+https://github.com/Olen/homeassistant-plant
 
 The card can be set up from the GUI (requires version 3.0.0)
 
