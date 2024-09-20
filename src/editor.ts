@@ -2,11 +2,9 @@ import { html } from 'lit';
 import { customElement  } from 'lit/decorators.js';
 import { DisplayType } from "./types/flower-card-types";
 import { default_show_bars, plantAttributes } from "./utils/constants";
-//import EditorForm from "@marcokreeft/ha-editor-formbuilder";
-import EditorForm from "D:/work/GitHub/ha-editor-formbuilder/dist";
-import { FormControlType } from "D:/work/GitHub/ha-editor-formbuilder/dist/interfaces";
-import { getEntitiesByDomain } from "D:/work/GitHub/ha-editor-formbuilder/dist/utils/entities";
-import { getEntitiesByDeviceClass } from "D:/work/GitHub/ha-editor-formbuilder/dist/utils/entities";
+import EditorForm from "@marcokreeft/ha-editor-formbuilder";
+import { FormControlType } from "@marcokreeft/ha-editor-formbuilder/dist/interfaces";
+import { getEntitiesByDomain, getEntitiesByDeviceClass } from "@marcokreeft/ha-editor-formbuilder/dist/utils/entities";
 
 @customElement('flower-card-editor')
 export class FlowerCardEditor extends EditorForm {

@@ -1,5 +1,5 @@
-//import { DropdownOption } from "@marcokreeft/ha-editor-formbuilder/dist/interfaces";
-import { DropdownOption } from "D:/work/GitHub/ha-editor-formbuilder/dist/interfaces";
+import { DropdownOption } from "@marcokreeft/ha-editor-formbuilder/dist/interfaces";
+//import { DropdownOption } from "D:/work/GitHub/ha-editor-formbuilder/dist/interfaces";
 
 export const CARD_NAME = "flower-card";
 export const CARD_EDITOR_NAME = `${CARD_NAME}-editor`;
