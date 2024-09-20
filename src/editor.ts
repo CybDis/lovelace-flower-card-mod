@@ -52,7 +52,7 @@ export class FlowerCardEditor extends EditorForm {
 
         return this.renderForm([
             {
-                label: "Countdown Type",
+                label: "hier hat sich was geändert",
                 cssClass: 'side-by-side',
                 controls: [{ configValue: "countdown_type", type: FormControlType.Checkboxes, items: plantAttributes }]
             },
@@ -65,7 +65,7 @@ export class FlowerCardEditor extends EditorForm {
             },
             { controls: [{ label: "Previous race", configValue: "previous_race", type: FormControlType.Dropdown, items: plantAttributes }] },
             {
-                label: "Standings",
+                label: "hier auch",
                 cssClass: 'side-by-side',
                 controls: [
                     { label: "Show team", configValue: "standings.show_team", type: FormControlType.Switch },
