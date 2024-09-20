@@ -6,7 +6,7 @@ import EditorForm from "@marcokreeft/ha-editor-formbuilder";
 import { FormControlType } from "@marcokreeft/ha-editor-formbuilder/dist/interfaces";
 //import { getEntitiesByDomain, getEntitiesByDeviceClass } from "@marcokreeft/ha-editor-formbuilder/dist/utils/entities";
 import {
-    TemplateResult,
+    
     css,
   } from "lit";
 
@@ -41,9 +41,9 @@ import {
 // }
 
 @customElement('flower-card-editor')
-export class NewCustomEditor extends EditorForm {
+export class FlowerCardEditor extends EditorForm {
 
-    protected render(): TemplateResult {
+    protected render() {
         if (!this._hass || !this._config) {
             return html``;
         }
