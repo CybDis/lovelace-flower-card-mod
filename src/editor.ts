@@ -40,7 +40,7 @@ import {
 //     }    
 // }
 
-@customElement('new-custom-editor')
+@customElement('flower-card-editor')
 export class NewCustomEditor extends EditorForm {
 
     protected render(): TemplateResult {

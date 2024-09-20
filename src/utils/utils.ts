@@ -4,8 +4,7 @@ import { default_show_bars } from "./constants";
 import FlowerCard from "../flower-card";
 
 export const getConfigElement = (): HTMLElement => {
-    //return document.createElement("flower-card-editor");
-    return document.createElement("new-custom-editor");
+    return document.createElement("flower-card-editor");
 }
 
 export const getStubConfig = (hass: HomeAssistant) => {
