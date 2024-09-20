@@ -1,3 +1,4 @@
+import { HassEntity } from 'home-assistant-js-websocket'; 
 import { HomeAssistant, fireEvent } from "custom-card-helpers";
 import { default_show_bars } from "./constants";
 import FlowerCard from "../flower-card";
@@ -7,8 +8,8 @@ export const getConfigElement = (): HTMLElement => {
 }
 
 export const getStubConfig = (hass: HomeAssistant) => {
-    const supportedEntities = Object.values(hass.states).filter(
-      (entity) => entity.entity_id.indexOf('plant.') === 0
+    const supportedEntities: HassEntity[] = Object.values(hass.states).filter(
+      (entity: HassEntity): entity is HassEntity => entity.entity_id.indexOf('plant.') === 0
     );
     const entity = supportedEntities.length > 0 ? supportedEntities[0].entity_id : 'plant.my_plant';
 

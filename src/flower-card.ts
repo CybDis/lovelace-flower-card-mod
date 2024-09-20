@@ -1,3 +1,4 @@
+import { HassEntity } from 'home-assistant-js-websocket'; 
 import { CSSResult, HTMLTemplateResult, LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
@@ -63,8 +64,8 @@ export default class FlowerCard extends LitElement {
     }
 
     static getStubConfig(ha: HomeAssistant) {
-        const supportedEntities = Object.values(ha.states).filter(
-            (entity) => entity.entity_id.indexOf('plant.') === 0
+        const supportedEntities: HassEntity[] = Object.values(ha.states).filter(
+            (entity: HassEntity): entity is HassEntity => entity.entity_id.indexOf('plant.') === 0
         );
         const entity = supportedEntities.length > 0 ? supportedEntities[0].entity_id : 'plant.my_plant';
 
@@ -112,7 +113,7 @@ export default class FlowerCard extends LitElement {
                 : ""
             }"></ha-icon>
                 </span>
-                <span id="battery">${renderBattery(this.config, this._hass)}</span>
+                <span id="battery">${renderBattery(this)}</span>
                 ${!hideSpecies ? html`<span id="species">${species} </span>` : ''}
             </div>
             <div class="divider"></div>
@@ -127,7 +128,7 @@ export default class FlowerCard extends LitElement {
                 type: "plant/get_info",
                 entity_id: this.config?.entity,
             });
-        } catch (err) {
+        } catch  {
             this.plantinfo = { result: {} };
         }
     }

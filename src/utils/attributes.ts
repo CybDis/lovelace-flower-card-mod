@@ -1,15 +1,15 @@
-import { HomeAssistant } from "custom-card-helpers";
-import { DisplayType, DisplayedAttribute, DisplayedAttributes, FlowerCardConfig, Icons, Limits, UOM, UOMT } from "../types/flower-card-types";
+import { DisplayType, DisplayedAttribute, DisplayedAttributes, Icons, Limits, UOM, UOMT } from "../types/flower-card-types";
 import { TemplateResult, html } from "lit";
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { default_show_bars } from "./constants";
 import { moreInfo } from "./utils";
 import FlowerCard from "../flower-card";
 
-export const renderBattery = (config: FlowerCardConfig, hass: HomeAssistant) => {
-    if(!config.battery_sensor) return html``;
+// export const renderBattery = (config: FlowerCardConfig, hass: HomeAssistant) => {
+export const renderBattery = (card: FlowerCard) => {
+    if(!card.config.battery_sensor) return html``;
 
-    const battery_sensor = hass.states[config.battery_sensor];
+    const battery_sensor = card._hass.states[card.config.battery_sensor];
     if(!battery_sensor) return html``;
 
     const state = parseInt(battery_sensor.state);
@@ -31,7 +31,7 @@ export const renderBattery = (config: FlowerCardConfig, hass: HomeAssistant) => 
     const { icon, color } = levels.find(({ threshold }) => state > threshold) ||  { icon: "mdi:battery-alert-variant-outline", color: "red" };
 
     return html`
-        <div class="battery tooltip">
+        <div class="battery tooltip" @click="${(e: Event) => { e.stopPropagation(); moreInfo(card, card.config.battery_sensor)}}">
             <div class="tip" style="text-align:center;">${state}%</div>
             <ha-icon .icon="${icon}" style="color: ${color}"></ha-icon>
         </div>
@@ -54,9 +54,9 @@ export const renderAttributes = (card: FlowerCard): TemplateResult[] => {
                 let { max, min, current, icon, sensor, unit_of_measurement } = result[elem];
                 max = Number(max);
                 min = Number(min);
-                current = Number(current);
                 icon = String(icon);
                 sensor = String(sensor);
+                current = Number(current);
                 unit_of_measurement = String(unit_of_measurement);
                 limits[`max_${elem}`] = { max, min };
                 curr[elem] = current;
@@ -111,7 +111,7 @@ export const renderAttribute = (card: FlowerCard, attr: DisplayedAttribute) => {
                     aval ? (val > max ? 100 : 0) : "0"
                 }%;"></span>
             </div>
-            <div class="header"><span class="value">${val}</span>&nbsp;<span class='unit'>${unsafeHTML(label)}</span></div>
+	    <div class="header"><span class="value">${val}</span>&nbsp;<span class='unit'>${unsafeHTML(label)}</span></div>
         </div>
     `;
 };
