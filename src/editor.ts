@@ -51,23 +51,6 @@ export class FlowerCardEditor extends EditorForm {
         }
 
         return this.renderForm([
-            { controls: [{ label: "Card Type (Required)", configValue: "card_type", type: FormControlType.Dropdown, items: plantAttributes }] },
-            { controls: [{ label: "Title", configValue: "title", type: FormControlType.Textbox }] },
-            {
-                label: "Basic configuration",
-                cssClass: 'side-by-side',
-                controls: [
-                    { label: "Use F1 font", configValue: "f1_font", type: FormControlType.Switch },
-                    { label: "Image clickable", configValue: "image_clickable", type: FormControlType.Switch },
-                    { label: "Show carnumber", configValue: "show_carnumber", type: FormControlType.Switch },
-                    { label: "Location clickable", configValue: "location_clickable", type: FormControlType.Switch },
-                    { label: "Show race information", configValue: "show_raceinfo", type: FormControlType.Switch },
-                    { label: "Hide track layout", configValue: "hide_tracklayout", type: FormControlType.Switch },
-                    { label: "Hide race dates and times", configValue: "hide_racedatetimes", type: FormControlType.Switch },
-                    { label: "Show last years result", configValue: "show_lastyears_result", type: FormControlType.Switch },
-                    { label: "Only show date", configValue: "only_show_date", type: FormControlType.Switch }
-                ]
-            },    
             {
                 label: "Countdown Type",
                 cssClass: 'side-by-side',
