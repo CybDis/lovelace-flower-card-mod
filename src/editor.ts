@@ -40,8 +40,8 @@ import {
 //     }    
 // }
 
-@customElement('CARD_EDITOR_NAME')
-export class FormulaOneCardEditor extends EditorForm {
+@customElement('new-custom-editor')
+export class NewCustomEditor extends EditorForm {
 
     protected render(): TemplateResult {
         if (!this._hass || !this._config) {
