@@ -2,13 +2,14 @@ import { html, css } from 'lit';
 import { customElement  } from 'lit/decorators.js';
 import { DisplayType } from "./types/flower-card-types";
 import { plantAttributes, default_show_bars } from "./utils/constants";
-import EditorForm from "@marcokreeft/ha-editor-formbuilder";
-import { FormControlType } from "@marcokreeft/ha-editor-formbuilder/dist/interfaces";
-import { getEntitiesByDomain, getEntitiesByDeviceClass } from "@marcokreeft/ha-editor-formbuilder/dist/utils/entities";
 
-//import EditorForm from "d:/work/GitHub/ha-editor-formbuilder-mod";
-// import { FormControlType } from "d:/work/GitHub/ha-editor-formbuilder-mod/dist/interfaces";
-// import { getEntitiesByDomain, getEntitiesByDeviceClass } from "d:/work/GitHub/ha-editor-formbuilder-mod/dist/utils/entities";
+// import EditorForm from "@marcokreeft/ha-editor-formbuilder";
+// import { FormControlType } from "@marcokreeft/ha-editor-formbuilder/dist/interfaces";
+// import { getEntitiesByDomain, getEntitiesByDeviceClass } from "@marcokreeft/ha-editor-formbuilder/dist/utils/entities";
+
+import EditorForm from "d:/work/GitHub/ha-editor-formbuilder-mod";
+import { FormControlType } from "d:/work/GitHub/ha-editor-formbuilder-mod/dist/interfaces";
+import { getEntitiesByDomain, getEntitiesByDeviceClass } from "d:/work/GitHub/ha-editor-formbuilder-mod/dist/utils/entities";
 
 @customElement('flower-card-editor')
 export class FlowerCardEditor extends EditorForm {
