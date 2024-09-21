@@ -7,7 +7,7 @@ export interface FlowerCardConfig extends LovelaceCardConfig {
     display_type?: DisplayType;
     name?: string;
     showSpecies?: boolean;
-    show_bars?: string;
+    show_bars?: string[];
 }
 
 export enum DisplayType {
