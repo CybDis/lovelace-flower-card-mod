@@ -7,16 +7,7 @@ export interface FlowerCardConfig extends LovelaceCardConfig {
     display_type?: DisplayType;
     name?: string;
     showSpecies?: boolean;
-    show_bars?: BarsType
-}
-
-export enum BarsType {
-    Moisture = "moisture",
-    Conductivity = "conductivity",
-    Temperature = "temperature",
-    Illuminance = "illuminance",
-    Humidity = "humidity",
-    DailyLightIntegral  = "dli"    
+    show_bars?: string;
 }
 
 export enum DisplayType {
