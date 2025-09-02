@@ -71,7 +71,7 @@ export const renderBattery = (card: FlowerCard): { html: TemplateResult, isStale
     
     // Überschreibe Icon und Farbe bei veralteten Daten
     if (isStale) {
-        icon = "mdi:battery-unknown";
+        icon = "mdi:battery-alert";
         color = "var(--warning-color, orange)";
     }
 

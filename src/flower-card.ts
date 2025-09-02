@@ -119,8 +119,7 @@ export default class FlowerCard extends LitElement {
                 : missingImage
             }">
                 <span id="name"> ${this.config.name} <ha-icon .icon="mdi:${hasPlantProblem 
-                ? "alert-circle-outline"
-                : hasBatteryProblem ? "battery-alert" : ""
+                ? "alert-circle-outline" : ""
             }"></ha-icon>
                 </span>
                 <span id="battery">${batteryResult.html}</span>
