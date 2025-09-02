@@ -52,7 +52,7 @@ jobs:
       # SCHRITT 3: Prüfen ob bereits ein Git-Tag für diese Version existiert
       # Verhindert doppelte Releases für dieselbe Version
       - name: "🏷️ Check if tag exists already"
-        uses: mukunku/tag-exists-action@v1.4.0
+        uses: mukunku/tag-exists-action@v1.6.0
         id: "check_tag"
         with: 
           tag: "v${{ env.COMPONENT_VERSION }}"
@@ -70,7 +70,7 @@ jobs:
  
       # SCHRITT 5: Node.js Umgebung einrichten für Build-Prozess
       - name: "👷 Build using Node.js"
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           
@@ -92,7 +92,7 @@ jobs:
       # SCHRITT 9: Änderungen zurück ins Repository pushen
       # Build-Artefakte werden für Release verfügbar gemacht
       - name: "⬆️ Push changes"
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v0.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
   
@@ -123,7 +123,7 @@ jobs:
 
       # SCHRITT 4: Erneute Tag-Prüfung (Sicherheitscheck)
       - name: "🏷️ Check if tag exists already"
-        uses: mukunku/tag-exists-action@v1.4.0
+        uses: mukunku/tag-exists-action@v1.6.0
         id: "check_tag"
         with: 
           tag: "v${{ env.COMPONENT_VERSION }}"
@@ -141,10 +141,11 @@ jobs:
       # SCHRITT 6: Letztes Release ermitteln für Changelog-Generierung
       - name: "🗝️ Get previous release version"
         id: last_release
-        uses: InsonusK/get-latest-release@v1.1.0
+        uses: pozetroninc/github-action-get-latest-release@v0.8.0
         with:
-          myToken: ${{ github.token }}
-          exclude_types: "draft|prerelease"  # Nur stabile Releases berücksichtigen
+          repository: ${{ github.repository }}
+          token: ${{ github.token }}
+          excludes: "draft"
 
       # SCHRITT 7: Neuen Git-Tag für Release erstellen
       - name: "🏷️ Create new tag"
@@ -160,17 +161,17 @@ jobs:
       # Erstellt Release Notes basierend auf Commits seit letztem Release
       - name: "🗒️ Generate release changelog"
         id: changelog
-        uses: heinrichreimer/github-changelog-generator-action@v2.3
+        uses: heinrichreimer/github-changelog-generator-action@v2.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }} 
-          sinceTag: ${{ steps.last_release.outputs.tag_name }}  # Nur Änderungen seit letztem Release
-          headerLabel: "# Notable changes since ${{ steps.last_release.outputs.tag_name }}"
+          sinceTag: ${{ steps.last_release.outputs.release }}  # Nur Änderungen seit letztem Release
+          headerLabel: "# Notable changes since ${{ steps.last_release.outputs.release }}"
           stripGeneratorNotice: true  # Generator-Hinweis entfernen
 
       # SCHRITT 9a: Stabiles Release erstellen (für normale Versionen)
       # Wird nur ausgeführt wenn Version NICHT "beta" enthält
       - name: 👍 Create Stable release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           prerelease: false  # Markiert als stabile Version
           body: "${{ steps.changelog.outputs.changelog }}"
@@ -182,7 +183,7 @@ jobs:
       # SCHRITT 9b: Beta-Release erstellen (für Beta-Versionen)
       # Wird nur ausgeführt wenn Version "beta" enthält
       - name: 🤞 Create Beta release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           prerelease: true  # Markiert als Vorabversion
           body: "${{ steps.changelog.outputs.changelog }}"
