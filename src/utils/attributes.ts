@@ -19,26 +19,75 @@ export const renderBattery = (card: FlowerCard) => {
     let isStale = false;
     
     // Ermittle den Geräte-Update-Sensor aus dem Batteriesensor-Namen
-    // z.B. "sensor.higrow10_battery" -> "sensor.higrow10_updated"
+    // Unterstützt verschiedene Namenskonventionen:
+    // "sensor.higrow10_battery" -> "sensor.higrow10_updated"
+    // "sensor.espsensorsolar2_espsensorsolar2_batt_percent" -> "sensor.espsensorsolar2_espsensorsolar2_updated"
     const batteryEntityId = card.config.battery_sensor;
-    const deviceUpdateEntityId = batteryEntityId.replace(/_battery$/, '_updated');
+    let deviceUpdateEntityId = batteryEntityId.replace(/_battery$/, '_updated');
+    
+    // Fallback für andere Battery-Namenskonventionen
+    if (deviceUpdateEntityId === batteryEntityId) {
+        // Versuche _batt_percent, _battery_level, _bat_level, etc.
+        deviceUpdateEntityId = batteryEntityId.replace(/_batt(?:ery)?(?:_percent|_level)?$/, '_updated');
+    }
+    
+    // Wenn immer noch kein Match, versuche das letzte Wort durch "updated" zu ersetzen
+    if (deviceUpdateEntityId === batteryEntityId) {
+        deviceUpdateEntityId = batteryEntityId.replace(/_[^_]+$/, '_updated');
+    }
+    
+    // Debug-Logging zur Problemanalyse
+    console.debug(
+        `%c FLOWER-CARD-BATTERY %c Battery: ${batteryEntityId} -> Update: ${deviceUpdateEntityId}`,
+        'color: orange; background: black; font-weight: bold;',
+        'color: yellow; background: black;'
+    );
     
     // Prüfe ob der Geräte-Update-Sensor existiert
     const deviceUpdateSensor = card._hass.states[deviceUpdateEntityId];
     if (deviceUpdateSensor) {
+        console.debug(
+            `%c FLOWER-CARD-BATTERY %c Update sensor found: ${deviceUpdateSensor.state}`,
+            'color: orange; background: black; font-weight: bold;',
+            'color: green; background: black;'
+        );
+        
         // Verwende den ISO-8601 Timestamp aus dem Update-Sensor
         // Format: "2018-05-28T16:00:13Z"
         const deviceTimestamp = deviceUpdateSensor.state;
         const parsedDate = new Date(deviceTimestamp);
         if (!isNaN(parsedDate.getTime())) {
             lastUpdated = parsedDate;
+            console.debug(
+                `%c FLOWER-CARD-BATTERY %c Using device timestamp: ${parsedDate.toISOString()}`,
+                'color: orange; background: black; font-weight: bold;',
+                'color: green; background: black;'
+            );
+        } else {
+            console.warn(
+                `%c FLOWER-CARD-BATTERY %c Invalid device timestamp: ${deviceTimestamp}`,
+                'color: orange; background: black; font-weight: bold;',
+                'color: red; background: black;'
+            );
         }
+    } else {
+        console.debug(
+            `%c FLOWER-CARD-BATTERY %c Update sensor not found, using battery last_updated`,
+            'color: orange; background: black; font-weight: bold;',
+            'color: yellow; background: black;'
+        );
     }
     
     // Berechne ob Daten veraltet sind (6 Stunden)
     const now = new Date();
     const timeSinceUpdate = Math.floor((now.getTime() - lastUpdated.getTime()) / 1000 / 60); // in Minuten
     isStale = timeSinceUpdate > 360; // 6 Stunden = 360 Minuten
+    
+    console.debug(
+        `%c FLOWER-CARD-BATTERY %c Stale check: ${timeSinceUpdate} minutes since update (${isStale ? 'STALE' : 'FRESH'})`,
+        'color: orange; background: black; font-weight: bold;',
+        isStale ? 'color: red; background: black;' : 'color: green; background: black;'
+    );
 
     const levels = [
         { threshold: 90, icon: "mdi:battery", color: "green" },
