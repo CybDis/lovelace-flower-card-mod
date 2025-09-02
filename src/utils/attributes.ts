@@ -14,11 +14,29 @@ export const renderBattery = (card: FlowerCard) => {
 
     const state = parseInt(battery_sensor.state);
     
-    // Stale Data Detection (6 Stunden)
-    const lastUpdated = new Date(battery_sensor.last_updated);
+    // Stale Data Detection (6 Stunden) - basierend auf Geräte-Update-Sensor
+    let lastUpdated = new Date(battery_sensor.last_updated); // Fallback
+    let isStale = false;
+    
+    // Ermittle den Geräte-Update-Sensor aus dem Batteriesensor-Namen
+    // z.B. "sensor.higrow10_battery" -> "sensor.higrow10_updated"
+    const batteryEntityId = card.config.battery_sensor;
+    const deviceUpdateEntityId = batteryEntityId.replace(/_battery$/, '_updated');
+    
+    // Prüfe ob der Geräte-Update-Sensor existiert
+    const deviceUpdateSensor = card._hass.states[deviceUpdateEntityId];
+    if (deviceUpdateSensor) {
+        // Verwende den Timestamp aus dem Update-Sensor
+        const deviceTimestamp = parseInt(deviceUpdateSensor.state);
+        if (!isNaN(deviceTimestamp)) {
+            lastUpdated = new Date(deviceTimestamp * 1000); // Unix Timestamp zu Date
+        }
+    }
+    
+    // Berechne ob Daten veraltet sind (6 Stunden)
     const now = new Date();
     const timeSinceUpdate = Math.floor((now.getTime() - lastUpdated.getTime()) / 1000 / 60); // in Minuten
-    const isStale = timeSinceUpdate > 360; // 6 Stunden = 360 Minuten
+    isStale = timeSinceUpdate > 360; // 6 Stunden = 360 Minuten
 
     const levels = [
         { threshold: 90, icon: "mdi:battery", color: "green" },
