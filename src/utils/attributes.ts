@@ -26,10 +26,12 @@ export const renderBattery = (card: FlowerCard) => {
     // Prüfe ob der Geräte-Update-Sensor existiert
     const deviceUpdateSensor = card._hass.states[deviceUpdateEntityId];
     if (deviceUpdateSensor) {
-        // Verwende den Timestamp aus dem Update-Sensor
-        const deviceTimestamp = parseInt(deviceUpdateSensor.state);
-        if (!isNaN(deviceTimestamp)) {
-            lastUpdated = new Date(deviceTimestamp * 1000); // Unix Timestamp zu Date
+        // Verwende den ISO-8601 Timestamp aus dem Update-Sensor
+        // Format: "2018-05-28T16:00:13Z"
+        const deviceTimestamp = deviceUpdateSensor.state;
+        const parsedDate = new Date(deviceTimestamp);
+        if (!isNaN(parsedDate.getTime())) {
+            lastUpdated = parsedDate;
         }
     }
     
