@@ -7,15 +7,15 @@ The card can be set up from the GUI (requires version 3.0.0)
 
 ![image](https://github.com/Olen/lovelace-flower-card/assets/203184/a31ad564-9458-41b4-9c1f-9da13f84f2ae)
 
-## ✨ New Features (Version 2025.9.3)
+## New Features (Version 2025.9.3)
 
-### 🎨 Problem State UI Highlighting
+### Problem State UI Highlighting
 The card now automatically highlights plants with problems using prominent visual indicators:
 - **Red background highlighting** for plants outside optimal ranges
 - **Enhanced visibility** with glow effects for dark mode compatibility
 - **Dynamic styling** based on real-time plant condition
 
-### 🔋 Advanced Battery Monitoring
+### Advanced Battery Monitoring
 Sophisticated battery monitoring with intelligent stale data detection:
 - **6-hour stale data threshold** - automatically detects when device data is outdated
 - **Device-level timestamp monitoring** using `device-update-sensor` entities
@@ -23,7 +23,7 @@ Sophisticated battery monitoring with intelligent stale data detection:
 - **Visual indicators** - battery icon changes to "unknown" state when data is stale
 - **HiGrow compatibility** - optimized for HiGrow and similar IoT plant sensors
 
-### 🔧 Enhanced Compatibility
+### Enhanced Compatibility
 - **ISO-8601 timestamp parsing** for modern IoT devices
 - **Automatic device sensor detection** (e.g., `sensor.higrow_battery` → `sensor.higrow_updated`)
 - **Improved error handling** and edge case coverage
@@ -65,30 +65,30 @@ The card automatically detects device update sensors for enhanced monitoring:
 - Supports ISO-8601 timestamp format from modern IoT devices
 - Falls back to battery sensor `last_updated` if device sensor unavailable
 
-## 📋 Version History
+## Version History
 
-### 🎉 Version 2025.9.3 (September 2, 2025)
+### Version 2025.9.3 (September 2, 2025)
 **Major release with UI enhancements and advanced battery monitoring**
 
-#### ✨ New Features:
+#### New Features:
 - **Problem State UI Highlighting**: Prominent red background for plants with problems
 - **Advanced Battery Monitoring**: 6-hour stale data detection with device-level timestamps
 - **Enhanced Visual Indicators**: Glow effects and improved dark mode compatibility
 - **Device Sensor Integration**: Automatic detection of device-update-sensor entities
 
-#### 🐛 Bug Fixes:
+#### Bug Fixes:
 - Fixed ISO-8601 timestamp parsing (was incorrectly using Unix format)
 - Improved device sensor name derivation pattern matching
 - Enhanced error handling for timestamp validation
 - Better Home Assistant state management compatibility
 
-#### 🔧 Technical Improvements:
+#### Technical Improvements:
 - Updated all dependencies to latest versions
 - Enhanced TypeScript type safety and code organization
 - Optimized Webpack build configuration for better performance
 - Improved documentation and code maintainability
 
-#### 🎯 Compatibility:
+#### Compatibility:
 - Home Assistant 2024.1+
 - HiGrow and compatible IoT plant sensors
 - Modern browsers with ES2020 support

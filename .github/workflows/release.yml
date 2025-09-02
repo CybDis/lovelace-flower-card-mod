@@ -38,20 +38,20 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       # SCHRITT 1: Code aus Repository auschecken
-      - name: "✏️ Checkout code"
+      - name: "Checkout code"
         uses: actions/checkout@v4
         with: 
           path: './'
           
       # SCHRITT 2: Versionsnummer aus package.json extrahieren
       # Verwendet grep und sed um die Version zu parsen
-      - name: "🏷️ Get version tag"
+      - name: "Get version tag"
         id: set_var
         run: echo "COMPONENT_VERSION=$(grep version package.json | cut -d ":" -f 2 | sed -e 's/[^0-9\.beta\-]//g')" >> $GITHUB_ENV
 
       # SCHRITT 3: Prüfen ob bereits ein Git-Tag für diese Version existiert
       # Verhindert doppelte Releases für dieselbe Version
-      - name: "🏷️ Check if tag exists already"
+      - name: "Check if tag exists already"
         uses: mukunku/tag-exists-action@v1.6.0
         id: "check_tag"
         with: 
@@ -59,7 +59,7 @@ jobs:
 
       # SCHRITT 4: Workflow abbrechen wenn Tag bereits existiert
       # Verhindert unnötige Builds wenn Version schon released wurde
-      - name: "❌ Cancel if tag is already present"
+      - name: "Cancel if tag is already present"
         run: |
           echo "Tag already present: v${{ env.COMPONENT_VERSION }}. Not creating a new release"
           gh run cancel ${{ github.run_id }}
@@ -69,7 +69,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'true'
  
       # SCHRITT 5: Node.js Umgebung einrichten für Build-Prozess
-      - name: "👷 Build using Node.js"
+      - name: "Build using Node.js"
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
@@ -82,7 +82,7 @@ jobs:
 
       # SCHRITT 8: Build-Artefakte committen
       # Git-Konfiguration für automatische Commits
-      - name: "📝 Commit files"
+      - name: "Commit files"
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -91,7 +91,7 @@ jobs:
           
       # SCHRITT 9: Änderungen zurück ins Repository pushen
       # Build-Artefakte werden für Release verfügbar gemacht
-      - name: "⬆️ Push changes"
+      - name: "Push changes"
         uses: ad-m/github-push-action@v0.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -105,31 +105,31 @@ jobs:
     needs: build  # Wartet bis Build-Job erfolgreich abgeschlossen ist
     steps:
       # SCHRITT 1: Aktuellen Code auschecken (mit Build-Artefakten)
-      - name: "⬇️ Checkout new code"
+      - name: "Checkout new code"
         uses: actions/checkout@v4
         with: 
           ref: master  # Explizit master branch um Build-Artefakte zu erhalten
           path: './'
 
       # SCHRITT 2: Version aus package.json extrahieren (erneut nach Build)
-      - name: "🏷️ Get version tag"
+      - name: "Get version tag"
         id: set_var
         run: echo "COMPONENT_VERSION=$(grep version package.json | cut -d ":" -f 2 | sed -e 's/[^0-9\.beta\-]//g')" >> $GITHUB_ENV
 
       # SCHRITT 3: Aktuellen Git SHA für Tag-Erstellung ermitteln
-      - name: "🏷️ Get git sha"
+      - name: "Get git sha"
         id: set_var_2
         run: echo "CURRENT_SHA=$(git log -1 --format='%H')" >> $GITHUB_ENV
 
       # SCHRITT 4: Erneute Tag-Prüfung (Sicherheitscheck)
-      - name: "🏷️ Check if tag exists already"
+      - name: "Check if tag exists already"
         uses: mukunku/tag-exists-action@v1.6.0
         id: "check_tag"
         with: 
           tag: "v${{ env.COMPONENT_VERSION }}"
 
       # SCHRITT 5: Workflow abbrechen falls Tag zwischenzeitlich erstellt wurde
-      - name: "❌ Cancel if tag is already present"
+      - name: "Cancel if tag is already present"
         run: |
           echo "Tag already present: v${{ env.COMPONENT_VERSION }}. Not creating a new release"
           gh run cancel ${{ github.run_id }}
@@ -139,7 +139,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'true'
 
       # SCHRITT 6: Letztes Release ermitteln für Changelog-Generierung
-      - name: "🗝️ Get previous release version"
+      - name: "Get previous release version"
         id: last_release
         uses: pozetroninc/github-action-get-latest-release@v0.8.0
         with:
@@ -148,7 +148,7 @@ jobs:
           excludes: "draft"
 
       # SCHRITT 7: Neuen Git-Tag für Release erstellen
-      - name: "🏷️ Create new tag"
+      - name: "Create new tag"
         uses: rickstaa/action-create-tag@v1
         id: "tag_create"
         with:
@@ -159,7 +159,7 @@ jobs:
 
       # SCHRITT 8: Changelog automatisch generieren
       # Erstellt Release Notes basierend auf Commits seit letztem Release
-      - name: "🗒️ Generate release changelog"
+      - name: "Generate release changelog"
         id: changelog
         uses: heinrichreimer/github-changelog-generator-action@v2.4
         with:
@@ -170,7 +170,7 @@ jobs:
 
       # SCHRITT 9a: Stabiles Release erstellen (für normale Versionen)
       # Wird nur ausgeführt wenn Version NICHT "beta" enthält
-      - name: 👍 Create Stable release
+      - name: Create Stable release
         uses: softprops/action-gh-release@v2
         with:
           prerelease: false  # Markiert als stabile Version
@@ -182,7 +182,7 @@ jobs:
 
       # SCHRITT 9b: Beta-Release erstellen (für Beta-Versionen)
       # Wird nur ausgeführt wenn Version "beta" enthält
-      - name: 🤞 Create Beta release
+      - name: Create Beta release
         uses: softprops/action-gh-release@v2
         with:
           prerelease: true  # Markiert als Vorabversion

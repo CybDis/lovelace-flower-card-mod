@@ -1,25 +1,25 @@
 # Flower Card Mod - Enhanced Plant Monitoring for Home Assistant
 
-## 🌿 **Version 2025.9.3 - Latest Release**
+## Version 2025.9.3 - Latest Release
 
 The **Flower Card Mod** is an enhanced version of the original Flower Card for Home Assistant, featuring advanced plant monitoring capabilities and modern UI enhancements. This TypeScript-based custom card provides comprehensive plant health visualization with intelligent problem detection and sophisticated battery monitoring.
 
-### ✨ **What's New in 2025.9.3**
+### What's New in 2025.9.3
 
-#### 🎨 **Problem State UI Highlighting**
+#### Problem State UI Highlighting
 - **Prominent Visual Indicators**: Plants with problems are automatically highlighted with red background and glow effects
 - **Dark Mode Optimized**: Enhanced visibility in dark mode dashboards with 30% opacity backgrounds
 - **Real-time Updates**: Dynamic styling based on current plant condition
 - **Accessibility Improved**: Better visual feedback for plant health status
 
-#### 🔋 **Advanced Battery Monitoring**
+#### Advanced Battery Monitoring
 - **Intelligent Stale Data Detection**: 6-hour threshold for detecting outdated IoT device data
 - **Device-Level Timestamps**: Uses device-update-sensor entities for precise monitoring
 - **Smart Fallback Logic**: Automatically falls back to battery sensor timestamps when needed
 - **HiGrow Compatibility**: Optimized for HiGrow and similar IoT plant sensors
 - **Visual Indicators**: Battery icon changes to "unknown" state when data is stale
 
-#### 🔧 **Technical Enhancements**
+#### Technical Enhancements
 - **ISO-8601 Timestamp Support**: Proper parsing of modern IoT device timestamps (format: "2018-05-28T16:00:13Z")
 - **Automatic Device Detection**: Smart sensor name derivation (e.g., `sensor.higrow_battery` → `sensor.higrow_updated`)
 - **Enhanced Error Handling**: Robust validation and edge case coverage
@@ -27,7 +27,7 @@ The **Flower Card Mod** is an enhanced version of the original Flower Card for H
 
 ---
 
-## 🏗️ **Architecture and Structure**
+## Architecture and Structure
 
 ### **Technology Stack**
 - **Frontend Framework**: Lit (Web Components)
@@ -60,7 +60,7 @@ The **Flower Card Mod** is an enhanced version of the original Flower Card for H
 
 ---
 
-## 🔧 **Core Features and Functionality**
+## Core Features and Functionality
 
 ### **1. Plant Health Visualization**
 - **Sensor Bars**: Visual representation of measurements (moisture, conductivity, etc.)
@@ -152,7 +152,7 @@ show_bars:                          # Measurements to display
 
 ---
 
-## 🎨 **UI/UX Design and Visual Features**
+## UI/UX Design and Visual Features
 
 ### **Problem State Highlighting (NEW)**
 ```css
@@ -177,7 +177,7 @@ show_bars:                          # Measurements to display
 
 ---
 
-## 🔄 **Build Process and CI/CD**
+## Build Process and CI/CD
 
 ### **Local Development**
 ```bash
@@ -244,7 +244,7 @@ GitHub Actions automates:
 
 ---
 
-## 📋 **Installation Methods**
+## Installation Methods
 
 ### **Via HACS (Recommended)**
 1. Add custom repository: `https://github.com/CybDis/lovelace-flower-card-mod`
@@ -258,7 +258,7 @@ GitHub Actions automates:
 
 ---
 
-## 🎯 **Compatibility**
+## Compatibility
 
 - **Home Assistant**: 2024.1+
 - **Browsers**: Modern browsers with ES2020 support
