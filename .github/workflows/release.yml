@@ -19,15 +19,11 @@
 ---
 name: "Auto Release"
 
-# TRIGGER: Workflow startet nur bei Push auf master/main Branch 
-# und nur wenn package.json geändert wurde (Version Update)
+# TRIGGER: Workflow startet bei Tag-Push (v*) für Releases
 on:
   push:
-    branches:
-      - 'main'
-      - 'master'
-    paths:
-      - 'package.json'
+    tags:
+      - 'v*'
 
 jobs:
   # =====================================================================
@@ -43,32 +39,13 @@ jobs:
         with: 
           path: './'
           
-      # SCHRITT 2: Versionsnummer aus package.json extrahieren
-      # Verwendet grep und sed um die Version zu parsen
+      # SCHRITT 2: Versionsnummer aus Git-Tag extrahieren
+      # Entfernt das "v" Prefix vom Tag-Namen
       - name: "Get version tag"
         id: set_var
-        run: echo "COMPONENT_VERSION=$(grep version package.json | cut -d ":" -f 2 | sed -e 's/[^0-9\.beta\-]//g')" >> $GITHUB_ENV
-
-      # SCHRITT 3: Prüfen ob bereits ein Git-Tag für diese Version existiert
-      # Verhindert doppelte Releases für dieselbe Version
-      - name: "Check if tag exists already"
-        uses: mukunku/tag-exists-action@v1.6.0
-        id: "check_tag"
-        with: 
-          tag: "v${{ env.COMPONENT_VERSION }}"
-
-      # SCHRITT 4: Workflow abbrechen wenn Tag bereits existiert
-      # Verhindert unnötige Builds wenn Version schon released wurde
-      - name: "Cancel if tag is already present"
-        run: |
-          echo "Tag already present: v${{ env.COMPONENT_VERSION }}. Not creating a new release"
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: steps.check_tag.outputs.exists == 'true'
+        run: echo "COMPONENT_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
  
-      # SCHRITT 5: Node.js Umgebung einrichten für Build-Prozess
+      # SCHRITT 3: Node.js Umgebung einrichten für Build-Prozess
       - name: "Build using Node.js"
         uses: actions/setup-node@v4
         with:
@@ -111,34 +88,17 @@ jobs:
           ref: master  # Explizit master branch um Build-Artefakte zu erhalten
           path: './'
 
-      # SCHRITT 2: Version aus package.json extrahieren (erneut nach Build)
+      # SCHRITT 2: Version aus Git-Tag extrahieren (erneut nach Build)
       - name: "Get version tag"
         id: set_var
-        run: echo "COMPONENT_VERSION=$(grep version package.json | cut -d ":" -f 2 | sed -e 's/[^0-9\.beta\-]//g')" >> $GITHUB_ENV
+        run: echo "COMPONENT_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       # SCHRITT 3: Aktuellen Git SHA für Tag-Erstellung ermitteln
       - name: "Get git sha"
         id: set_var_2
         run: echo "CURRENT_SHA=$(git log -1 --format='%H')" >> $GITHUB_ENV
 
-      # SCHRITT 4: Erneute Tag-Prüfung (Sicherheitscheck)
-      - name: "Check if tag exists already"
-        uses: mukunku/tag-exists-action@v1.6.0
-        id: "check_tag"
-        with: 
-          tag: "v${{ env.COMPONENT_VERSION }}"
-
-      # SCHRITT 5: Workflow abbrechen falls Tag zwischenzeitlich erstellt wurde
-      - name: "Cancel if tag is already present"
-        run: |
-          echo "Tag already present: v${{ env.COMPONENT_VERSION }}. Not creating a new release"
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: steps.check_tag.outputs.exists == 'true'
-
-      # SCHRITT 6: Letztes Release ermitteln für Changelog-Generierung
+      # SCHRITT 4: Letztes Release ermitteln für Changelog-Generierung
       - name: "Get previous release version"
         id: last_release
         uses: pozetroninc/github-action-get-latest-release@v0.8.0
@@ -147,17 +107,7 @@ jobs:
           token: ${{ github.token }}
           excludes: "draft"
 
-      # SCHRITT 7: Neuen Git-Tag für Release erstellen
-      - name: "Create new tag"
-        uses: rickstaa/action-create-tag@v1
-        id: "tag_create"
-        with:
-          tag: "v${{ env.COMPONENT_VERSION }}"
-          commit_sha: "${{ env.CURRENT_SHA }}"
-          tag_exists_error: false
-          message: "Version ${{ env.COMPONENT_VERSION }}"
-
-      # SCHRITT 8: Changelog automatisch generieren
+      # SCHRITT 5: Changelog automatisch generieren
       # Erstellt Release Notes basierend auf Commits seit letztem Release
       - name: "Generate release changelog"
         id: changelog
@@ -168,7 +118,7 @@ jobs:
           headerLabel: "# Notable changes since ${{ steps.last_release.outputs.release }}"
           stripGeneratorNotice: true  # Generator-Hinweis entfernen
 
-      # SCHRITT 9a: Stabiles Release erstellen (für normale Versionen)
+      # SCHRITT 6a: Stabiles Release erstellen (für normale Versionen)
       # Wird nur ausgeführt wenn Version NICHT "beta" enthält
       - name: Create Stable release
         uses: softprops/action-gh-release@v2
@@ -180,7 +130,7 @@ jobs:
           target_commitish: "${{ env.CURRENT_SHA }}"
         if: contains(env.COMPONENT_VERSION, 'beta') == false
 
-      # SCHRITT 9b: Beta-Release erstellen (für Beta-Versionen)
+      # SCHRITT 6b: Beta-Release erstellen (für Beta-Versionen)
       # Wird nur ausgeführt wenn Version "beta" enthält
       - name: Create Beta release
         uses: softprops/action-gh-release@v2
