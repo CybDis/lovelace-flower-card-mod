@@ -13,6 +13,12 @@ export const renderBattery = (card: FlowerCard) => {
     if(!battery_sensor) return html``;
 
     const state = parseInt(battery_sensor.state);
+    
+    // Stale Data Detection (6 Stunden)
+    const lastUpdated = new Date(battery_sensor.last_updated);
+    const now = new Date();
+    const timeSinceUpdate = Math.floor((now.getTime() - lastUpdated.getTime()) / 1000 / 60); // in Minuten
+    const isStale = timeSinceUpdate > 360; // 6 Stunden = 360 Minuten
 
     const levels = [
         { threshold: 90, icon: "mdi:battery", color: "green" },
@@ -28,7 +34,13 @@ export const renderBattery = (card: FlowerCard) => {
         { threshold: -Infinity, icon: "mdi:battery-alert-variant-outline", color: "red" },
     ];
 
-    const { icon, color } = levels.find(({ threshold }) => state > threshold) ||  { icon: "mdi:battery-alert-variant-outline", color: "red" };
+    let { icon, color } = levels.find(({ threshold }) => state > threshold) ||  { icon: "mdi:battery-alert-variant-outline", color: "red" };
+    
+    // Überschreibe Icon und Farbe bei veralteten Daten
+    if (isStale) {
+        icon = "mdi:battery-unknown";
+        color = "var(--warning-color, orange)";
+    }
 
     return html`
         <div class="battery tooltip" @click="${(e: Event) => { e.stopPropagation(); moreInfo(card, card.config.battery_sensor)}}">
