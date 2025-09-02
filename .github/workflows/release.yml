@@ -1,6 +1,26 @@
+# GitHub Actions Workflow: Automatisches Release-System
+# 
+# Diese Workflow erstellt automatisch ein neues Release wenn die package.json 
+# auf dem master/main Branch geändert wird. Sie besteht aus zwei Jobs:
+# 
+# 1. BUILD JOB:
+#    - Prüft ob ein Tag für die aktuelle Version bereits existiert
+#    - Baut das Projekt mit Node.js und npm
+#    - Committed und pusht die Build-Artefakte zurück ins Repository
+# 
+# 2. AUTO-RELEASE JOB:
+#    - Erstellt einen neuen Git-Tag für die Version
+#    - Generiert automatisch ein Changelog seit dem letzten Release
+#    - Erstellt ein GitHub Release (stable oder beta je nach Versionsnummer)
+#
+# Die Workflow wird nur ausgelöst wenn package.json geändert wird, um 
+# sicherzustellen dass nur bei Versionsupdates ein Release erstellt wird.
+#
 ---
 name: "Auto Release"
 
+# TRIGGER: Workflow startet nur bei Push auf master/main Branch 
+# und nur wenn package.json geändert wurde (Version Update)
 on:
   push:
     branches:
@@ -10,24 +30,35 @@ on:
       - 'package.json'
 
 jobs:
+  # =====================================================================
+  # BUILD JOB: Erstellt Build-Artefakte und prüft Versionskonsistenz
+  # =====================================================================
   build:
     name: "Build Release"
     runs-on: "ubuntu-latest"
     steps:
+      # SCHRITT 1: Code aus Repository auschecken
       - name: "✏️ Checkout code"
         uses: actions/checkout@v4
         with: 
           path: './'
+          
+      # SCHRITT 2: Versionsnummer aus package.json extrahieren
+      # Verwendet grep und sed um die Version zu parsen
       - name: "🏷️ Get version tag"
         id: set_var
         run: echo "COMPONENT_VERSION=$(grep version package.json | cut -d ":" -f 2 | sed -e 's/[^0-9\.beta\-]//g')" >> $GITHUB_ENV
 
+      # SCHRITT 3: Prüfen ob bereits ein Git-Tag für diese Version existiert
+      # Verhindert doppelte Releases für dieselbe Version
       - name: "🏷️ Check if tag exists already"
         uses: mukunku/tag-exists-action@v1.4.0
         id: "check_tag"
         with: 
           tag: "v${{ env.COMPONENT_VERSION }}"
 
+      # SCHRITT 4: Workflow abbrechen wenn Tag bereits existiert
+      # Verhindert unnötige Builds wenn Version schon released wurde
       - name: "❌ Cancel if tag is already present"
         run: |
           echo "Tag already present: v${{ env.COMPONENT_VERSION }}. Not creating a new release"
@@ -37,49 +68,67 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: steps.check_tag.outputs.exists == 'true'
  
+      # SCHRITT 5: Node.js Umgebung einrichten für Build-Prozess
       - name: "👷 Build using Node.js"
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
+          
+      # SCHRITT 6: Dependencies installieren (npm ci für reproduzierbare Builds)
       - run: npm ci
+      
+      # SCHRITT 7: Build-Script ausführen (falls vorhanden in package.json)
       - run: npm run build --if-present
 
+      # SCHRITT 8: Build-Artefakte committen
+      # Git-Konfiguration für automatische Commits
       - name: "📝 Commit files"
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git status
           git commit -m "Add new build" -a
+          
+      # SCHRITT 9: Änderungen zurück ins Repository pushen
+      # Build-Artefakte werden für Release verfügbar gemacht
       - name: "⬆️ Push changes"
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
   
+  # =====================================================================
+  # AUTO-RELEASE JOB: Erstellt GitHub Release mit Changelog
+  # =====================================================================
   auto-release:
     name: "Auto Release"
     runs-on: "ubuntu-latest"
-    needs: build
+    needs: build  # Wartet bis Build-Job erfolgreich abgeschlossen ist
     steps:
+      # SCHRITT 1: Aktuellen Code auschecken (mit Build-Artefakten)
       - name: "⬇️ Checkout new code"
         uses: actions/checkout@v4
         with: 
-          ref: master
+          ref: master  # Explizit master branch um Build-Artefakte zu erhalten
           path: './'
 
+      # SCHRITT 2: Version aus package.json extrahieren (erneut nach Build)
       - name: "🏷️ Get version tag"
         id: set_var
         run: echo "COMPONENT_VERSION=$(grep version package.json | cut -d ":" -f 2 | sed -e 's/[^0-9\.beta\-]//g')" >> $GITHUB_ENV
 
+      # SCHRITT 3: Aktuellen Git SHA für Tag-Erstellung ermitteln
       - name: "🏷️ Get git sha"
         id: set_var_2
         run: echo "CURRENT_SHA=$(git log -1 --format='%H')" >> $GITHUB_ENV
 
+      # SCHRITT 4: Erneute Tag-Prüfung (Sicherheitscheck)
       - name: "🏷️ Check if tag exists already"
         uses: mukunku/tag-exists-action@v1.4.0
         id: "check_tag"
         with: 
           tag: "v${{ env.COMPONENT_VERSION }}"
 
+      # SCHRITT 5: Workflow abbrechen falls Tag zwischenzeitlich erstellt wurde
       - name: "❌ Cancel if tag is already present"
         run: |
           echo "Tag already present: v${{ env.COMPONENT_VERSION }}. Not creating a new release"
@@ -89,13 +138,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: steps.check_tag.outputs.exists == 'true'
 
+      # SCHRITT 6: Letztes Release ermitteln für Changelog-Generierung
       - name: "🗝️ Get previous release version"
         id: last_release
         uses: InsonusK/get-latest-release@v1.1.0
         with:
           myToken: ${{ github.token }}
-          exclude_types: "draft|prerelease"
+          exclude_types: "draft|prerelease"  # Nur stabile Releases berücksichtigen
 
+      # SCHRITT 7: Neuen Git-Tag für Release erstellen
       - name: "🏷️ Create new tag"
         uses: rickstaa/action-create-tag@v1
         id: "tag_create"
@@ -105,29 +156,35 @@ jobs:
           tag_exists_error: false
           message: "Version ${{ env.COMPONENT_VERSION }}"
 
+      # SCHRITT 8: Changelog automatisch generieren
+      # Erstellt Release Notes basierend auf Commits seit letztem Release
       - name: "🗒️ Generate release changelog"
         id: changelog
         uses: heinrichreimer/github-changelog-generator-action@v2.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }} 
-          sinceTag: ${{ steps.last_release.outputs.tag_name }}
+          sinceTag: ${{ steps.last_release.outputs.tag_name }}  # Nur Änderungen seit letztem Release
           headerLabel: "# Notable changes since ${{ steps.last_release.outputs.tag_name }}"
-          stripGeneratorNotice: true
+          stripGeneratorNotice: true  # Generator-Hinweis entfernen
 
+      # SCHRITT 9a: Stabiles Release erstellen (für normale Versionen)
+      # Wird nur ausgeführt wenn Version NICHT "beta" enthält
       - name: 👍 Create Stable release
         uses: softprops/action-gh-release@v1
         with:
-          prerelease: false
+          prerelease: false  # Markiert als stabile Version
           body: "${{ steps.changelog.outputs.changelog }}"
           name: "Version ${{ env.COMPONENT_VERSION }}"
           tag_name: "v${{ env.COMPONENT_VERSION }}"
           target_commitish: "${{ env.CURRENT_SHA }}"
         if: contains(env.COMPONENT_VERSION, 'beta') == false
 
+      # SCHRITT 9b: Beta-Release erstellen (für Beta-Versionen)
+      # Wird nur ausgeführt wenn Version "beta" enthält
       - name: 🤞 Create Beta release
         uses: softprops/action-gh-release@v1
         with:
-          prerelease: true
+          prerelease: true  # Markiert als Vorabversion
           body: "${{ steps.changelog.outputs.changelog }}"
           name: "Version ${{ env.COMPONENT_VERSION }}"
           tag_name: "v${{ env.COMPONENT_VERSION }}"

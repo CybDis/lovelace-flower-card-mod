@@ -4,6 +4,10 @@ export const style = css`
 .card-margin-top {
   margin-top: 32px;
 }
+.problem-state {
+  background-color: rgba(244, 67, 54, 0.08) !important;
+  border: 1px solid rgba(244, 67, 54, 0.12) !important;
+}
 .attributes {
   display: flex;
   white-space: nowrap;

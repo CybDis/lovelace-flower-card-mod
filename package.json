@@ -1,6 +1,6 @@
 {
   "name": "flower-card",
-  "version": "2024.9.24",
+  "version": "2025.9.2-beta.1",
   "description": "Custom flower card for https://github.com/Olen/homeassistant-plant",
   "keywords": [
     "home-assistant",
@@ -11,14 +11,13 @@
   "module": "flower-card.js",
   "license": "MIT",
   "dependencies": {
-    "@babel/preset-env": "^7.25.4",
+    "@babel/preset-env": "^7.28.3",
     "@marcokreeft/ha-editor-formbuilder": "^2024.9.1",
-    "babel-loader": "^9.2.1",
     "compression-webpack-plugin": "^11.1.0",
     "custom-card-helpers": "^1.9.0",
-    "home-assistant-js-websocket": "^9.4.0",
-    "lit": "^3.2.0",
-    "webpack": "^5.94.0",
+    "home-assistant-js-websocket": "^9.5.0",
+    "lit": "^3.3.1",
+    "webpack": "^5.101.3",
     "yarn": "^1.22.22"
   },
   "scripts": {
@@ -27,10 +26,11 @@
     "build": "yarn lint && webpack -c webpack.config.js"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.6.0",
-    "eslint": "^9.10.0",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.6.2",
-    "webpack-cli": "^5.1.4"
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "babel-loader": "^10.0.0",
+    "eslint": "^9.34.0",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.2",
+    "webpack-cli": "^6.0.1"
   }
 }

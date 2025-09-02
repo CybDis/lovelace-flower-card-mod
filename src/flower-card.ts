@@ -98,7 +98,9 @@ export default class FlowerCard extends LitElement {
         const species = this.stateObj.attributes.species;
         const hideSpecies = this.config.hide_species !== undefined ? this.config.hide_species : false;
         const headerCssClass = this.config.display_type === DisplayType.Compact ? "header-compact" : "header";
-        const haCardCssClass = this.config.display_type === DisplayType.Compact ? "" : "card-margin-top";
+        const baseCardClass = this.config.display_type === DisplayType.Compact ? "" : "card-margin-top";
+        const problemClass = this.stateObj.state.toLowerCase() === "problem" ? "problem-state" : "";
+        const haCardCssClass = `${baseCardClass} ${problemClass}`.trim();
 
         return html`
             <ha-card class="${haCardCssClass}">
