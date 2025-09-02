@@ -1,104 +1,141 @@
-# Flower Card Mod - Detaillierte Projektanalyse
+# Flower Card Mod - Enhanced Plant Monitoring for Home Assistant
 
-## 🌿 **Projektübersicht**
+## 🌿 **Version 2025.9.3 - Latest Release**
 
-Die **Flower Card Mod** ist eine erweiterte Version der ursprünglichen Flower Card für Home Assistant. Sie stellt eine spezialisierte Lovelace-Karte bereit, die Pflanzendaten visualisiert und überwacht. Das Projekt ist eine TypeScript-basierte Custom Card, die als Mod/Fork der originalen Flower Card entwickelt wurde.
+The **Flower Card Mod** is an enhanced version of the original Flower Card for Home Assistant, featuring advanced plant monitoring capabilities and modern UI enhancements. This TypeScript-based custom card provides comprehensive plant health visualization with intelligent problem detection and sophisticated battery monitoring.
+
+### ✨ **What's New in 2025.9.3**
+
+#### 🎨 **Problem State UI Highlighting**
+- **Prominent Visual Indicators**: Plants with problems are automatically highlighted with red background and glow effects
+- **Dark Mode Optimized**: Enhanced visibility in dark mode dashboards with 30% opacity backgrounds
+- **Real-time Updates**: Dynamic styling based on current plant condition
+- **Accessibility Improved**: Better visual feedback for plant health status
+
+#### 🔋 **Advanced Battery Monitoring**
+- **Intelligent Stale Data Detection**: 6-hour threshold for detecting outdated IoT device data
+- **Device-Level Timestamps**: Uses device-update-sensor entities for precise monitoring
+- **Smart Fallback Logic**: Automatically falls back to battery sensor timestamps when needed
+- **HiGrow Compatibility**: Optimized for HiGrow and similar IoT plant sensors
+- **Visual Indicators**: Battery icon changes to "unknown" state when data is stale
+
+#### 🔧 **Technical Enhancements**
+- **ISO-8601 Timestamp Support**: Proper parsing of modern IoT device timestamps (format: "2018-05-28T16:00:13Z")
+- **Automatic Device Detection**: Smart sensor name derivation (e.g., `sensor.higrow_battery` → `sensor.higrow_updated`)
+- **Enhanced Error Handling**: Robust validation and edge case coverage
+- **Dependency Updates**: All packages updated to latest versions for security and performance
 
 ---
 
-## 🏗️ **Architektur und Aufbau**
+## 🏗️ **Architecture and Structure**
 
-### **Technologie-Stack**
+### **Technology Stack**
 - **Frontend Framework**: Lit (Web Components)
-- **Programmiersprache**: TypeScript
-- **Build-System**: Webpack 5
-- **Styling**: CSS-in-JS mit Lit
-- **Linting**: ESLint mit TypeScript-Unterstützung
+- **Programming Language**: TypeScript
+- **Build System**: Webpack 5
+- **Styling**: CSS-in-JS with Lit
+- **Linting**: ESLint with TypeScript support
 - **Integration**: Home Assistant WebSocket API
 
-### **Projekt-Struktur**
+### **Project Structure**
 ```
-├── src/                          # Hauptquellcode
-│   ├── flower-card.ts           # Haupt-Komponente (LitElement)
-│   ├── editor.ts                # GUI-Konfigurationseditor
-│   ├── styles.ts                # CSS-Styling-Definitionen
-│   ├── types/                   # TypeScript-Typdefinitionen
+├── src/                          # Main source code
+│   ├── flower-card.ts           # Main component (LitElement) with problem state detection
+│   ├── editor.ts                # GUI configuration editor
+│   ├── styles.ts                # CSS styling definitions with problem-state class
+│   ├── types/                   # TypeScript type definitions
 │   │   └── flower-card-types.ts
-│   └── utils/                   # Hilfsfunktionen
-│       ├── attributes.ts        # Attribut-Rendering und -Logik
-│       ├── constants.ts         # Konstanten und Konfiguration
-│       └── utils.ts             # Allgemeine Hilfsfunktionen
-├── flower-card.js               # Kompilierte Output-Datei
-├── package.json                 # NPM-Abhängigkeiten und Scripts
-├── webpack.config.js            # Build-Konfiguration
-├── tsconfig.json                # TypeScript-Konfiguration
-├── hacs.json                    # HACS-Integration-Metadaten
-└── .github/workflows/           # CI/CD Automatisierung
-    └── release.yml              # Automatisches Release-System
+│   └── utils/                   # Utility functions
+│       ├── attributes.ts        # Battery monitoring with stale data detection
+│       ├── constants.ts         # Constants and configuration
+│       └── utils.ts             # General utility functions
+├── flower-card.js               # Compiled output file
+├── package.json                 # NPM dependencies and scripts
+├── webpack.config.js            # Build configuration
+├── tsconfig.json                # TypeScript configuration
+├── hacs.json                    # HACS integration metadata
+└── .github/workflows/           # CI/CD automation
+    └── release.yml              # Automatic release system
 ```
 
 ---
 
-## 🔧 **Funktionsweise und Features**
+## 🔧 **Core Features and Functionality**
 
-### **1. Kern-Funktionalität**
-Die Flower Card visualisiert Pflanzendaten durch:
-- **Sensor-Balken**: Visuelle Darstellung von Messwerten (Feuchtigkeit, Leitfähigkeit, etc.)
-- **Grenzwert-Anzeige**: Farbkodierte Balken (grün = optimal, rot = problematisch)
-- **Interaktive Tooltips**: Detaillierte Informationen bei Hover
-- **Batterie-Anzeige**: Optional für Sensoren mit Batteriestatus
+### **1. Plant Health Visualization**
+- **Sensor Bars**: Visual representation of measurements (moisture, conductivity, etc.)
+- **Limit Indicators**: Color-coded bars (green = optimal, red = problematic)
+- **Problem State Highlighting**: NEW - Automatic red background for plants with issues
+- **Interactive Tooltips**: Detailed information on hover
+- **Battery Display**: Optional with advanced stale data detection
 
-### **2. Unterstützte Messwerte**
-- **Moisture** (Bodenfeuchtigkeit)
-- **Conductivity** (Leitfähigkeit/Nährstoffe)
-- **Temperature** (Temperatur)
-- **Illuminance** (Lichtstärke)
-- **Humidity** (Luftfeuchtigkeit)
-- **DLI** (Daily Light Integral - Tageslichtsumme)
+### **2. Supported Measurements**
+- **Moisture** (Soil moisture)
+- **Conductivity** (Nutrients/fertility)
+- **Temperature** (Ambient temperature)
+- **Illuminance** (Light intensity)
+- **Humidity** (Air humidity)
+- **DLI** (Daily Light Integral)
 
-### **3. Display-Modi**
-- **Full Mode**: Vollständige Anzeige mit Bild und allen Details
-- **Compact Mode**: Kompakte Darstellung für platzsparende Layouts
+### **3. Display Modes**
+- **Full Mode**: Complete display with image and all details
+- **Compact Mode**: Space-saving layout for smaller dashboards
+
+### **4. Advanced Battery Monitoring**
+```typescript
+// Device sensor detection example
+// "sensor.higrow10_battery" → "sensor.higrow10_updated"
+const deviceUpdateEntityId = batteryEntityId.replace(/_battery$/, '_updated');
+
+// ISO-8601 timestamp parsing
+const parsedDate = new Date(deviceTimestamp); // "2018-05-28T16:00:13Z"
+
+// 6-hour stale detection
+const timeSinceUpdate = Math.floor((now.getTime() - lastUpdated.getTime()) / 1000 / 60);
+isStale = timeSinceUpdate > 360; // 6 hours = 360 minutes
+```
 
 ---
 
-## 🔌 **Integration und Abhängigkeiten**
+## 🔌 **Integration and Dependencies**
 
 ### **Home Assistant Integration**
 ```typescript
-// WebSocket-Kommunikation mit Custom Plant Integration
+// WebSocket communication with Custom Plant Integration
 this.plantinfo = await hass.callWS({
     type: "plant/get_info",
     entity_id: this.config?.entity,
 });
 ```
 
-### **Externe Abhängigkeiten**
-1. **Erforderlich**: [Custom Plant Integration](https://github.com/Olen/homeassistant-plant)
-   - Stellt WebSocket-API `plant/get_info` bereit
-   - Verwaltet Pflanzendaten und Grenzwerte
-   - Sammelt Sensordaten von verschiedenen Quellen
+### **External Dependencies**
+1. **Required**: [Custom Plant Integration](https://github.com/Olen/homeassistant-plant)
+   - Provides WebSocket API `plant/get_info`
+   - Manages plant data and limits
+   - Collects sensor data from various sources
 
-2. **Optional**: Batterie-Sensoren für Geräte-Monitoring
+2. **Optional**: Battery sensors for device monitoring
+   - Standard battery sensors (e.g., `sensor.device_battery`)
+   - Device update sensors (e.g., `sensor.device_updated`)
 
-### **HACS-Kompatibilität**
-- Vollständig HACS-kompatibel
-- Automatische Updates über HACS
-- Einfache Installation als Custom Repository
+### **HACS Compatibility**
+- Fully HACS compatible
+- Automatic updates via HACS
+- Easy installation as Custom Repository
 
 ---
 
-## ⚙️ **Konfiguration**
+## ⚙️ **Configuration**
 
-### **YAML-Konfiguration**
+### **YAML Configuration**
 ```yaml
 type: custom:flower-card
-entity: plant.my_plant              # Pflanzenetität (erforderlich)
-name: "Meine Pflanze"               # Anzeigename (optional)
-battery_sensor: sensor.plant_battery # Batterie-Sensor (optional)
-display_type: full                  # "full" oder "compact"
-hide_species: false                 # Pflanzenart ausblenden
-show_bars:                          # Anzuzeigende Messwerte
+entity: plant.my_plant              # Plant entity (required)
+name: "My Plant"                    # Display name (optional)
+battery_sensor: sensor.plant_battery # Battery sensor (optional)
+display_type: full                  # "full" or "compact"
+hide_species: false                 # Hide plant species
+show_bars:                          # Measurements to display
   - moisture
   - conductivity
   - temperature
@@ -107,135 +144,132 @@ show_bars:                          # Anzuzeigende Messwerte
   - dli
 ```
 
-### **GUI-Editor**
-- **Formular-basierte Konfiguration** über `@marcokreeft/ha-editor-formbuilder`
-- **Automatische Entity-Erkennung** für Plant- und Battery-Entitäten
-- **Checkbox-Auswahl** für anzuzeigende Attribute
-- **Echtzeit-Vorschau** der Konfigurationsänderungen
+### **GUI Editor**
+- **Form-based configuration** using `@marcokreeft/ha-editor-formbuilder`
+- **Automatic entity detection** for Plant and Battery entities
+- **Checkbox selection** for attributes to display
+- **Real-time preview** of configuration changes
 
 ---
 
-## 📊 **Datenfluss und Rendering**
+## 🎨 **UI/UX Design and Visual Features**
 
-### **1. Daten-Abruf**
-```mermaid
-Home Assistant → WebSocket API → Plant Integration → Flower Card
+### **Problem State Highlighting (NEW)**
+```css
+.problem-state {
+    background-color: rgba(244, 67, 54, 0.3) !important;
+    border: 2px solid rgba(244, 67, 54, 0.6) !important;
+    box-shadow: 0 0 10px rgba(244, 67, 54, 0.4) !important;
+}
 ```
 
-### **2. Rendering-Pipeline**
-1. **Daten-Fetch**: WebSocket-Aufruf an Plant Integration
-2. **Attribut-Verarbeitung**: Extraktion von Messwerten und Grenzwerten
-3. **Visualisierung**: Generierung der HTML-Balken mit CSS-Styling
-4. **Interaktivität**: Event-Handler für Tooltips und More-Info-Dialoge
+### **Visual Design**
+- **Material Design Icons** for sensors
+- **Color-coded bars**: Green (optimal), Orange (warning), Red (critical)
+- **Responsive layout**: Adapts to different screen sizes
+- **Hover tooltips**: Additional information without space consumption
+- **Dark mode optimization**: Enhanced visibility with glow effects
 
-### **3. Performance-Optimierung**
-- **Throttling**: Maximal eine WebSocket-Anfrage pro Sekunde
-- **Selective Updates**: Nur bei tatsächlichen Datenänderungen
-- **Lazy Loading**: Editor wird nur bei Bedarf geladen
-
----
-
-## 🎨 **UI/UX-Design**
-
-### **Visuelles Design**
-- **Material Design Icons** für Sensoren
-- **Farbkodierte Balken**: Grün (optimal), Orange (Warnung), Rot (kritisch)
-- **Responsive Layout**: Anpassung an verschiedene Bildschirmgrößen
-- **Hover-Tooltips**: Zusätzliche Informationen ohne Platzverbrauch
-
-### **Accessibility**
-- **Semantisches HTML**: Korrekte Verwendung von ARIA-Attributen
-- **Keyboard-Navigation**: Vollständig über Tastatur bedienbar
-- **Screen Reader**: Kompatibilität mit Assistenztechnologien
+### **Battery Status Indicators**
+- **Normal state**: Color-coded based on charge level (green/orange/red)
+- **Stale data state**: Orange "unknown" icon when data > 6 hours old
+- **Visual feedback**: Immediate recognition of connectivity issues
 
 ---
 
-## 🔄 **Build-Prozess und CI/CD**
+## 🔄 **Build Process and CI/CD**
 
-### **Lokale Entwicklung**
+### **Local Development**
 ```bash
-npm ci                    # Dependencies installieren
-npm run dev              # Development Build
-npm run build            # Production Build mit Linting
+npm ci                    # Install dependencies
+npm run dev              # Development build
+npm run build            # Production build with linting
 ```
 
-### **Automatisches Release-System**
-Die GitHub Action automatisiert:
-1. **Build-Artefakte**: Kompilierung bei package.json-Änderungen
-2. **Versionierung**: Automatische Tag-Erstellung
-3. **Changelog**: Generierung basierend auf Git-Commits
-4. **Release-Erstellung**: Unterscheidung zwischen Stable/Beta-Versionen
+### **Automatic Release System**
+GitHub Actions automates:
+1. **Build artifacts**: Compilation on package.json changes
+2. **Versioning**: Automatic tag creation
+3. **Changelog**: Generation based on Git commits
+4. **Release creation**: Distinction between stable/beta versions
 
-### **Webpack-Konfiguration**
-- **TypeScript-Kompilierung** mit ts-loader
-- **Babel-Transformation** für Browser-Kompatibilität
-- **Code-Minifizierung** für Produktions-Builds
-- **Compression**: Gzip-Komprimierung der Output-Dateien
-
----
-
-## 🔧 **Erweiterbarkeit**
-
-### **Plugin-Architektur**
-- **Modularer Aufbau**: Einfache Erweiterung um neue Sensor-Typen
-- **Type-Safe**: Vollständige TypeScript-Unterstützung
-- **Custom Attributes**: Einfache Addition neuer Messwerte
-- **Theming**: CSS-Variablen für individuelle Anpassungen
-
-### **Entwickler-Features**
-- **Hot Reload**: Automatische Neuladen bei Entwicklung
-- **Source Maps**: Debugging-Unterstützung
-- **ESLint-Integration**: Code-Qualitätssicherung
-- **Type Checking**: Compile-time Fehlererkennung
+### **Webpack Configuration**
+- **TypeScript compilation** with ts-loader
+- **Babel transformation** for browser compatibility
+- **Code minification** for production builds
+- **Compression**: Gzip compression of output files
 
 ---
 
-## 🔐 **Sicherheit und Best Practices**
+## 📈 **Performance and Monitoring**
 
-### **Code-Qualität**
-- **TypeScript Strict Mode**: Maximale Type-Safety
-- **ESLint-Regeln**: Einheitlicher Code-Style
-- **Error Handling**: Graceful Degradation bei Fehlern
-- **Input Validation**: Sichere Konfigurationsverarbeitung
+### **Performance Features**
+- **Throttling**: Maximum one WebSocket request per second
+- **Selective updates**: Only on actual data changes
+- **Lazy loading**: Editor loaded only when needed
+- **Bundle optimization**: Optimized output size
 
-### **Performance**
-- **Bundle Size**: Optimierte Ausgabegröße
-- **Lazy Loading**: Komponenten werden bei Bedarf geladen
-- **Memory Management**: Effiziente DOM-Manipulation
-- **WebSocket-Optimierung**: Minimale API-Aufrufe
-
----
-
-## 📈 **Monitoring und Debugging**
-
-### **Console-Logging**
-```typescript
-console.info(
-    `%c FLOWER-CARD %c ${packageJson.version}`,
-    'color: cyan; background: black; font-weight: bold;',
-    'color: darkblue; background: white; font-weight: bold;'
-);
-```
-
-### **Error Handling**
-- **Graceful Fallbacks**: Bei fehlenden Entitäten oder Daten
-- **User-friendly Messages**: Verständliche Fehlermeldungen
-- **Debug Information**: Detaillierte Logs für Entwickler
+### **Error Handling and Debugging**
+- **Graceful fallbacks**: For missing entities or data
+- **User-friendly messages**: Understandable error messages
+- **Debug information**: Detailed logs for developers
+- **Console logging** with version information
 
 ---
 
-## 🌟 **Besonderheiten dieser Mod-Version**
+## 🔐 **Security and Best Practices**
 
-1. **Erweiterte Konfiguration**: Mehr Anpassungsoptionen als das Original
-1. **Moderne Tech-Stack**: Neueste Versionen von Lit und TypeScript
-2. **Enhanced UI**: Bessere Benutzerfreundlichkeit und Design
+### **Code Quality**
+- **TypeScript Strict Mode**: Maximum type safety
+- **ESLint rules**: Consistent code style
+- **Error handling**: Graceful degradation on errors
+- **Input validation**: Secure configuration processing
+
+### **Security Features**
+- **Bundle size optimization**: Minimal attack surface
+- **Dependency updates**: Latest security patches
+- **Memory management**: Efficient DOM manipulation
+- **WebSocket optimization**: Minimal API calls
 
 ---
 
-**Version**: 2025.9.2  
-**Lizenz**: MIT  
+## 🌟 **Key Differences from Original**
+
+1. **Problem State Visualization**: NEW - Automatic highlighting of plant problems
+2. **Advanced Battery Monitoring**: NEW - Sophisticated stale data detection
+3. **Device-Level Timestamps**: NEW - Uses device update sensors for precise monitoring
+4. **Enhanced Visual Design**: Improved dark mode compatibility and visual feedback
+5. **Modern Tech Stack**: Latest versions of Lit and TypeScript
+6. **Better Error Handling**: More robust and user-friendly error management
+
+---
+
+## 📋 **Installation Methods**
+
+### **Via HACS (Recommended)**
+1. Add custom repository: `https://github.com/CybDis/lovelace-flower-card-mod`
+2. Install "Flower Card" from HACS
+3. Add to Lovelace resources automatically
+
+### **Manual Installation**
+1. Download `flower-card.js` from releases
+2. Place in `<config>/www/community/flower-card/`
+3. Add to Lovelace resources manually
+
+---
+
+## 🎯 **Compatibility**
+
+- **Home Assistant**: 2024.1+
+- **Browsers**: Modern browsers with ES2020 support
+- **IoT Devices**: HiGrow, Xiaomi Plant Monitor, and compatible sensors
+- **Plant Integration**: Custom Plant Integration by Olen required
+
+---
+
+**Version**: 2025.9.3  
+**License**: MIT  
 **Maintainer**: CybDis  
-**Ursprünglich von**: Olen  
+**Originally by**: Olen  
 
-Diese Flower Card Mod bietet eine robuste, erweiterbare und benutzerfreundliche Lösung für die Überwachung von Pflanzendaten in Home Assistant mit modernster Web-Technologie und automatisiertem Release-Management.
-
+This enhanced Flower Card Mod provides a robust, extensible, and user-friendly solution for monitoring plant data in Home Assistant with cutting-edge web technology, intelligent problem detection, and advanced IoT device monitoring capabilities.
