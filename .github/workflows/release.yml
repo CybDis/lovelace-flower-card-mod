@@ -157,38 +157,25 @@ jobs:
           tag_exists_error: false
           message: "Version ${{ env.COMPONENT_VERSION }}"
 
-      # SCHRITT 8: Einfache Release-Beschreibung erstellen
-      # Erstellt eine saubere, lesbare Release-Beschreibung
-      - name: "Generate release description"
-        id: release_description
-        run: |
-          if [[ "${{ env.COMPONENT_VERSION }}" == *"beta"* ]]; then
-            echo "RELEASE_BODY=## Beta Release ${{ env.COMPONENT_VERSION }}
-
-          This is a beta release for testing purposes.
-          
-          ### What's included:
-          - Latest code changes and improvements
-          - Enhanced plant monitoring features
-          - UI improvements and bug fixes
-          
-          ### Installation:
-          Download the \`flower-card.js\` file and add it to your Home Assistant setup.
-          
-          **Note:** This is a beta version. Please test carefully before using in production." >> $GITHUB_ENV
-          else
-            echo "RELEASE_BODY=## Release ${{ env.COMPONENT_VERSION }}
-
-          ### Features:
-          - Advanced plant problem detection with visual highlighting
-          - Battery monitoring with stale data detection (6-hour threshold)
-          - Enhanced compatibility with IoT plant sensors
-          
-          ### Installation:
-          Download the \`flower-card.js\` file and add it to your Home Assistant setup.
-          
-          For detailed changelog, see the commit history." >> $GITHUB_ENV
-          fi
+      # SCHRITT 8: Changelog automatisch generieren
+      # Erstellt Release Notes basierend auf Commits seit letztem Release
+      - name: "Generate release changelog"
+        id: changelog
+        uses: heinrichreimer/github-changelog-generator-action@v2.4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sinceTag: ${{ steps.last_release.outputs.release }}
+          stripGeneratorNotice: true
+          stripHeaders: false
+          pullRequests: true
+          issues: true
+          issuesWoLabels: true
+          prWoLabels: true
+          compareLink: true
+          author: true
+          unreleased: false
+          maxIssues: 50
+          excludeLabels: "duplicate,question,invalid,wontfix"
 
       # SCHRITT 9a: Stabiles Release erstellen (für normale Versionen)
       # Wird nur ausgeführt wenn Version NICHT "beta" enthält
@@ -196,7 +183,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           prerelease: false  # Markiert als stabile Version
-          body: "${{ env.RELEASE_BODY }}"
+          body: "${{ steps.changelog.outputs.changelog }}"
           name: "Version ${{ env.COMPONENT_VERSION }}"
           tag_name: "v${{ env.COMPONENT_VERSION }}"
           target_commitish: "${{ env.CURRENT_SHA }}"
@@ -208,7 +195,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           prerelease: true  # Markiert als Vorabversion
-          body: "${{ env.RELEASE_BODY }}"
+          body: "${{ steps.changelog.outputs.changelog }}"
           name: "Version ${{ env.COMPONENT_VERSION }}"
           tag_name: "v${{ env.COMPONENT_VERSION }}"
           target_commitish: "${{ env.CURRENT_SHA }}"
