@@ -5,8 +5,9 @@ export const style = css`
   margin-top: 32px;
 }
 .problem-state {
-  background-color: rgba(244, 67, 54, 0.08) !important;
-  border: 1px solid rgba(244, 67, 54, 0.12) !important;
+  background-color: rgba(244, 67, 54, 0.3) !important;
+  border: 2px solid rgba(244, 67, 54, 0.8) !important;
+  box-shadow: 0 0 8px rgba(244, 67, 54, 0.4) !important;
 }
 .attributes {
   display: flex;
