@@ -99,7 +99,15 @@ export default class FlowerCard extends LitElement {
         const hideSpecies = this.config.hide_species !== undefined ? this.config.hide_species : false;
         const headerCssClass = this.config.display_type === DisplayType.Compact ? "header-compact" : "header";
         const baseCardClass = this.config.display_type === DisplayType.Compact ? "" : "card-margin-top";
-        const problemClass = this.stateObj.state.toLowerCase() === "problem" ? "problem-state" : "";
+        
+        // Prüfe Battery-Status für Problem-State
+        const batteryResult = renderBattery(this);
+        const isBatteryStale = batteryResult.isStale;
+        
+        // Problem-State wenn Plant-State "problem" ist ODER Battery stale ist
+        const hasPlantProblem = this.stateObj.state.toLowerCase() === "problem";
+        const hasBatteryProblem = isBatteryStale;
+        const problemClass = (hasPlantProblem || hasBatteryProblem) ? "problem-state" : "";
         const haCardCssClass = `${baseCardClass} ${problemClass}`.trim();
 
         return html`
@@ -110,12 +118,12 @@ export default class FlowerCard extends LitElement {
                 ? this.stateObj.attributes.entity_picture
                 : missingImage
             }">
-                <span id="name"> ${this.config.name} <ha-icon .icon="mdi:${this.stateObj.state.toLowerCase() == "problem" 
+                <span id="name"> ${this.config.name} <ha-icon .icon="mdi:${hasPlantProblem 
                 ? "alert-circle-outline"
-                : ""
+                : hasBatteryProblem ? "battery-alert" : ""
             }"></ha-icon>
                 </span>
-                <span id="battery">${renderBattery(this)}</span>
+                <span id="battery">${batteryResult.html}</span>
                 ${!hideSpecies ? html`<span id="species">${species} </span>` : ''}
             </div>
             <div class="divider"></div>

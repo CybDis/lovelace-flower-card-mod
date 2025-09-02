@@ -6,11 +6,11 @@ import { moreInfo } from "./utils";
 import FlowerCard from "../flower-card";
 
 // export const renderBattery = (config: FlowerCardConfig, hass: HomeAssistant) => {
-export const renderBattery = (card: FlowerCard) => {
-    if(!card.config.battery_sensor) return html``;
+export const renderBattery = (card: FlowerCard): { html: TemplateResult, isStale: boolean } => {
+    if(!card.config.battery_sensor) return { html: html``, isStale: false };
 
     const battery_sensor = card._hass.states[card.config.battery_sensor];
-    if(!battery_sensor) return html``;
+    if(!battery_sensor) return { html: html``, isStale: false };
 
     const state = parseInt(battery_sensor.state);
     
@@ -36,58 +36,22 @@ export const renderBattery = (card: FlowerCard) => {
         deviceUpdateEntityId = batteryEntityId.replace(/_[^_]+$/, '_updated');
     }
     
-    // Debug-Logging zur Problemanalyse
-    console.debug(
-        `%c FLOWER-CARD-BATTERY %c Battery: ${batteryEntityId} -> Update: ${deviceUpdateEntityId}`,
-        'color: orange; background: black; font-weight: bold;',
-        'color: yellow; background: black;'
-    );
-    
     // Prüfe ob der Geräte-Update-Sensor existiert
     const deviceUpdateSensor = card._hass.states[deviceUpdateEntityId];
     if (deviceUpdateSensor) {
-        console.debug(
-            `%c FLOWER-CARD-BATTERY %c Update sensor found: ${deviceUpdateSensor.state}`,
-            'color: orange; background: black; font-weight: bold;',
-            'color: green; background: black;'
-        );
-        
         // Verwende den ISO-8601 Timestamp aus dem Update-Sensor
         // Format: "2018-05-28T16:00:13Z"
         const deviceTimestamp = deviceUpdateSensor.state;
         const parsedDate = new Date(deviceTimestamp);
         if (!isNaN(parsedDate.getTime())) {
             lastUpdated = parsedDate;
-            console.debug(
-                `%c FLOWER-CARD-BATTERY %c Using device timestamp: ${parsedDate.toISOString()}`,
-                'color: orange; background: black; font-weight: bold;',
-                'color: green; background: black;'
-            );
-        } else {
-            console.warn(
-                `%c FLOWER-CARD-BATTERY %c Invalid device timestamp: ${deviceTimestamp}`,
-                'color: orange; background: black; font-weight: bold;',
-                'color: red; background: black;'
-            );
         }
-    } else {
-        console.debug(
-            `%c FLOWER-CARD-BATTERY %c Update sensor not found, using battery last_updated`,
-            'color: orange; background: black; font-weight: bold;',
-            'color: yellow; background: black;'
-        );
     }
     
     // Berechne ob Daten veraltet sind (6 Stunden)
     const now = new Date();
     const timeSinceUpdate = Math.floor((now.getTime() - lastUpdated.getTime()) / 1000 / 60); // in Minuten
     isStale = timeSinceUpdate > 360; // 6 Stunden = 360 Minuten
-    
-    console.debug(
-        `%c FLOWER-CARD-BATTERY %c Stale check: ${timeSinceUpdate} minutes since update (${isStale ? 'STALE' : 'FRESH'})`,
-        'color: orange; background: black; font-weight: bold;',
-        isStale ? 'color: red; background: black;' : 'color: green; background: black;'
-    );
 
     const levels = [
         { threshold: 90, icon: "mdi:battery", color: "green" },
@@ -111,12 +75,15 @@ export const renderBattery = (card: FlowerCard) => {
         color = "var(--warning-color, orange)";
     }
 
-    return html`
-        <div class="battery tooltip" @click="${(e: Event) => { e.stopPropagation(); moreInfo(card, card.config.battery_sensor)}}">
-            <div class="tip" style="text-align:center;">${state}%</div>
-            <ha-icon .icon="${icon}" style="color: ${color}"></ha-icon>
-        </div>
-    `;
+    return {
+        html: html`
+            <div class="battery tooltip" @click="${(e: Event) => { e.stopPropagation(); moreInfo(card, card.config.battery_sensor)}}">
+                <div class="tip" style="text-align:center;">${state}%</div>
+                <ha-icon .icon="${icon}" style="color: ${color}"></ha-icon>
+            </div>
+        `,
+        isStale: isStale
+    };
 }
 export const renderAttributes = (card: FlowerCard): TemplateResult[] => {
     const icons: Icons = {};
