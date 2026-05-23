@@ -71,6 +71,9 @@ export const style = css`
 .header.no-image {
   height: auto;
   padding: 16px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 .header.no-image + .divider {
   margin-top: 0;
@@ -78,11 +81,28 @@ export const style = css`
 .header-compact.no-image {
   height: auto;
   padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 .header.no-image > #name,
 .header-compact.no-image > #name {
+  flex: 1;
+  min-width: 0;
+  width: auto;
   margin-top: 0;
   margin-left: 0;
+}
+.header.no-image > #battery,
+.header-compact.no-image > #battery {
+  float: none;
+  margin-top: 0;
+  margin-left: auto;
+}
+.header.no-image > #species,
+.header-compact.no-image > #species {
+  width: 100%;
+  margin-top: 2px;
 }
 .header > #name {
   font-weight: bold;
