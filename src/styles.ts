@@ -30,7 +30,7 @@ export const style = css`
 }
 #battery {
   float: right;
-  margin-right: 16px;
+  margin-right: 10px;
   margin-top: -15px;
 }
 .header {
