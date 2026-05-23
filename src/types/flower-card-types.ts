@@ -6,7 +6,7 @@ export interface FlowerCardConfig extends LovelaceCardConfig {
     battery_sensor?: string;
     display_type?: DisplayType;
     name?: string;
-    showSpecies?: boolean;
+    hide_species?: boolean;
     show_bars?: string[];
 }
 

@@ -1,12 +1,12 @@
-import { HassEntity } from 'home-assistant-js-websocket'; 
+import { HassEntity } from 'home-assistant-js-websocket';
 import { CSSResult, HTMLTemplateResult, LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { HomeAssistant, LovelaceCardEditor } from 'custom-card-helpers';
+import { HomeAssistant } from 'custom-card-helpers';
 import { style } from './styles';
 import { DisplayType, FlowerCardConfig, HomeAssistantEntity, PlantInfo } from './types/flower-card-types';
 import * as packageJson from '../package.json';
 import { renderAttributes, renderBattery } from './utils/attributes';
-import { CARD_EDITOR_NAME, CARD_NAME, default_show_bars, missingImage } from './utils/constants';
+import { CARD_NAME, default_show_bars, missingImage } from './utils/constants';
 import { moreInfo } from './utils/utils';
 
 console.info(
@@ -58,9 +58,55 @@ export default class FlowerCard extends LitElement {
         }
     }
 
-    public static async getConfigElement(): Promise<LovelaceCardEditor> {
-        await import("./editor");
-        return document.createElement(CARD_EDITOR_NAME) as LovelaceCardEditor;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static getConfigForm(): any {
+        return {
+            schema: [
+                {
+                    name: "display_type",
+                    selector: {
+                        select: {
+                            options: [
+                                { label: "Full", value: DisplayType.Full },
+                                { label: "Compact", value: DisplayType.Compact },
+                            ]
+                        }
+                    }
+                },
+                { name: "entity", required: true, selector: { entity: { domain: "plant" } } },
+                { name: "name", selector: { text: {} } },
+                { name: "battery_sensor", selector: { entity: { domain: "sensor", device_class: "battery" } } },
+                {
+                    name: "show_bars",
+                    selector: {
+                        select: {
+                            multiple: true,
+                            options: [
+                                { label: "Moisture", value: "moisture" },
+                                { label: "Conductivity", value: "conductivity" },
+                                { label: "Temperature", value: "temperature" },
+                                { label: "Illuminance", value: "illuminance" },
+                                { label: "Humidity", value: "humidity" },
+                                { label: "Daily Light Integral", value: "dli" },
+                            ]
+                        }
+                    }
+                },
+                { name: "hide_species", selector: { boolean: {} } },
+            ],
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            computeLabel: (schema: any) => {
+                const labels: Record<string, string> = {
+                    display_type: "Display Type",
+                    entity: "Entity",
+                    name: "Name",
+                    battery_sensor: "Battery Sensor",
+                    show_bars: "Show Bars",
+                    hide_species: "Hide Species",
+                };
+                return labels[schema.name] || schema.name;
+            }
+        };
     }
 
     static getStubConfig(ha: HomeAssistant) {
