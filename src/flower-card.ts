@@ -93,6 +93,7 @@ export default class FlowerCard extends LitElement {
                     }
                 },
                 { name: "hide_species", selector: { boolean: {} } },
+                { name: "hide_image", selector: { boolean: {} } },
             ],
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             computeLabel: (schema: any) => {
@@ -103,6 +104,7 @@ export default class FlowerCard extends LitElement {
                     battery_sensor: "Battery Sensor",
                     show_bars: "Show Bars",
                     hide_species: "Hide Species",
+                    hide_image: "Hide Image",
                 };
                 return labels[schema.name] || schema.name;
             }
@@ -143,8 +145,10 @@ export default class FlowerCard extends LitElement {
 
         const species = this.stateObj.attributes.species;
         const hideSpecies = this.config.hide_species !== undefined ? this.config.hide_species : false;
+        const hideImage = this.config.hide_image ?? false;
         const headerCssClass = this.config.display_type === DisplayType.Compact ? "header-compact" : "header";
-        const baseCardClass = this.config.display_type === DisplayType.Compact ? "" : "card-margin-top";
+        const baseCardClass = (this.config.display_type === DisplayType.Compact || hideImage) ? "" : "card-margin-top";
+        const noImageClass = hideImage ? " no-image" : "";
         
         // Prüfe Battery-Status für Problem-State
         const batteryResult = renderBattery(this);
@@ -158,12 +162,9 @@ export default class FlowerCard extends LitElement {
 
         return html`
             <ha-card class="${haCardCssClass}">
-            <div class="${headerCssClass}" @click="${() =>
+            <div class="${headerCssClass}${noImageClass}" @click="${() =>
                 moreInfo(this, this.stateObj.entity_id)}">
-                <img src="${this.stateObj.attributes.entity_picture
-                ? this.stateObj.attributes.entity_picture
-                : missingImage
-            }">
+                ${!hideImage ? html`<img src="${this.stateObj.attributes.entity_picture ? this.stateObj.attributes.entity_picture : missingImage}">` : ''}
                 <span id="name"> ${this.config.name} <ha-icon .icon="mdi:${hasPlantProblem 
                 ? "alert-circle-outline" : ""
             }"></ha-icon>

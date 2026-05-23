@@ -147,6 +147,18 @@ export class FlowerCardEditor extends LitElement {
                 </div>
 
                 <div class="form-row">
+                    <div class="form-control">
+                        <ha-switch
+                            id="hide_image"
+                            .checked="${this._config.hide_image || false}"
+                            .configValue="${'hide_image'}"
+                            @change="${this._valueChanged}"
+                        ></ha-switch>
+                        <label for="hide_image">Hide Image</label>
+                    </div>
+                </div>
+
+                <div class="form-row">
                     <label>Show Bars</label>
                     ${plantAttributes.map(attr => html`
                         <div class="form-control">
