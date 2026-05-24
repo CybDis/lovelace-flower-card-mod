@@ -51,7 +51,7 @@ export const renderBattery = (card: FlowerCard): { html: TemplateResult, isStale
     // Berechne ob Daten veraltet sind (6 Stunden)
     const now = new Date();
     const timeSinceUpdate = Math.floor((now.getTime() - lastUpdated.getTime()) / 1000 / 60); // in Minuten
-    isStale = timeSinceUpdate > 360; // 6 Stunden = 360 Minuten
+    isStale = timeSinceUpdate > 540 || battery_sensor.state === 'unavailable' || battery_sensor.state === 'unknown'; // 9 Stunden = 540 Minuten
 
     const levels = [
         { threshold: 90, icon: "mdi:battery", color: "green" },
