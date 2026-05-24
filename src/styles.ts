@@ -29,17 +29,19 @@ export const style = css`
   width: 50%;
 }
 #battery {
-  float: right;
-  margin-right: 10px;
-  margin-top: -15px;
+  position: absolute;
+  right: 10px;
+  top: 8px;
 }
 .header {
   padding-top: 8px;
   height: 72px;
+  position: relative;
 }
 .header-compact {
   padding-top: 4px;
   height: 55px;
+  position: relative;
 }
 .attribute .header, .attribute .header-compact {
   height: auto;
@@ -95,7 +97,7 @@ export const style = css`
 }
 .header.no-image > #battery,
 .header-compact.no-image > #battery {
-  float: none;
+  position: static;
   margin-top: 0;
   margin-left: auto;
 }
