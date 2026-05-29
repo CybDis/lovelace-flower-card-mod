@@ -86,25 +86,48 @@ export const renderBattery = (card: FlowerCard): { html: TemplateResult, isStale
     };
 }
 export const renderSensorFreshness = (card: FlowerCard): { html: TemplateResult } => {
-    // Sammle die Sensor-Entities der angezeigten Pflanzen-Attribute
-    const monitored = card.config.show_bars || default_show_bars;
-    const sensorIds: string[] = [];
-    if (card.plantinfo && card.plantinfo.result) {
-        for (const elem of monitored) {
-            const r = card.plantinfo.result[elem];
-            if (r && r.sensor) sensorIds.push(String(r.sensor));
-        }
-    }
-
-    // Neuesten last_updated-Zeitstempel über alle Sensoren ermitteln
-    // (= "wann hat die Pflanze zuletzt frische Daten gesendet")
     let newest: number | null = null;
-    for (const id of sensorIds) {
-        const st = card._hass.states[id];
-        if (!st) continue;
-        const t = new Date(st.last_updated).getTime();
-        if (isNaN(t)) continue;
-        if (newest === null || t > newest) newest = t;
+
+    // Wenn battery_sensor konfiguriert ist, dieselbe _updated-Sensor-Logik wie renderBattery verwenden
+    if (card.config.battery_sensor) {
+        const batteryEntityId = card.config.battery_sensor;
+        let deviceUpdateEntityId = batteryEntityId.replace(/_battery$/, '_updated');
+        if (deviceUpdateEntityId === batteryEntityId)
+            deviceUpdateEntityId = batteryEntityId.replace(/_batt(?:ery)?(?:_percent|_level)?$/, '_updated');
+        if (deviceUpdateEntityId === batteryEntityId)
+            deviceUpdateEntityId = batteryEntityId.replace(/_[^_]+$/, '_updated');
+
+        const deviceUpdateSensor = card._hass.states[deviceUpdateEntityId];
+        if (deviceUpdateSensor) {
+            const t = new Date(deviceUpdateSensor.state).getTime();
+            if (!isNaN(t)) newest = t;
+        }
+
+        // Fallback: last_updated des Batteriesensors selbst
+        if (newest === null) {
+            const batterySensor = card._hass.states[batteryEntityId];
+            if (batterySensor) {
+                const t = new Date(batterySensor.last_updated).getTime();
+                if (!isNaN(t)) newest = t;
+            }
+        }
+    } else {
+        // Ohne battery_sensor: neuesten last_updated über alle Pflanzensensoren
+        const monitored = card.config.show_bars || default_show_bars;
+        const sensorIds: string[] = [];
+        if (card.plantinfo && card.plantinfo.result) {
+            for (const elem of monitored) {
+                const r = card.plantinfo.result[elem];
+                if (r && r.sensor) sensorIds.push(String(r.sensor));
+            }
+        }
+        for (const id of sensorIds) {
+            const st = card._hass.states[id];
+            if (!st) continue;
+            const t = new Date(st.last_updated).getTime();
+            if (isNaN(t)) continue;
+            if (newest === null || t > newest) newest = t;
+        }
     }
 
     // Fehlender oder ungültiger Zeitstempel -> neutrale graue Badge
