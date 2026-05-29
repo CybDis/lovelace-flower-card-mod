@@ -38,6 +38,66 @@ export const style = css`
   right: 10px;
   top: 8px;
 }
+#sensor-freshness {
+  position: absolute;
+  right: 10px;
+  top: 33px;
+  z-index: 1;
+}
+.freshness-badge {
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.3;
+  padding: 1px 5px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+  color: #f5f5f5;
+  background: rgba(0, 0, 0, 0.45);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+/* Schriftfarbe bleibt statisch hell (gut lesbar); das Freshness-Level
+   wird nur über die Randfarbe angezeigt, nicht über die Schrift. */
+.freshness-badge.fresh {
+  border-color: rgba(129, 199, 132, 0.55);
+}
+.freshness-badge.warn {
+  border-color: rgba(255, 193, 7, 0.6);
+}
+.freshness-badge.stale {
+  border-color: rgba(244, 67, 54, 0.65);
+}
+.freshness-badge.unknown {
+  border-color: rgba(158, 158, 158, 0.45);
+}
+/* Lesbarkeit auf eingefärbten Karten (orange/rot) sicherstellen:
+   dunkler Chip-Hintergrund, damit der farbige Text Kontrast behält
+   (verhindert "orange auf orange" im Battery-Warning-State). */
+.battery-warning-state .freshness-badge,
+.problem-state .freshness-badge {
+  background: rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+/* No-Image: Akku steht im Flex-Flow rechts oben; Badge absolut darunter ausrichten */
+.header.no-image > #sensor-freshness {
+  right: 16px;
+  top: 40px;
+}
+.header-compact.no-image > #sensor-freshness {
+  right: 16px;
+  top: 32px;
+}
+/* Ausnahme: Kompakt + ohne Bild + ohne Species -> kein Platz darunter,
+   Badge bleibt links neben dem Akku (im Flex-Flow). */
+.header-compact.no-image:not(:has(#species)) > #sensor-freshness {
+  position: static;
+  right: auto;
+  top: auto;
+  margin-left: 0;
+  margin-right: 3px;
+  align-self: flex-start;
+}
 .header {
   padding-top: 8px;
   height: 72px;
@@ -230,6 +290,10 @@ export const style = css`
 @media (max-width: 600px) {
   .header > .unit {
     display: none;
+  }
+  .freshness-badge {
+    font-size: 0.55rem;
+    padding: 1px 4px;
   }
 }
 `;
