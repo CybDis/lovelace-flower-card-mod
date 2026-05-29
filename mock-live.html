@@ -162,60 +162,66 @@
 
   /* ---------------------------------------------------------------
      Test cards (compact, with/without image, primarily moisture)
+     freshMin = minutes since last device update (_updated sensor state).
+     This drives BOTH the freshness badge AND battery-stale detection:
+       ≤ 90 min  → badge "fresh"  (green)
+       91–180    → badge "warn"   (yellow)
+       > 180     → badge "stale"  (red)
+       > 540     → additionally: battery icon shows stale warning
   --------------------------------------------------------------- */
   const CARDS = [
-    { label:"Compact · with image · moisture",
+    { label:"Compact · with image · freshness FRESH (4 min)",
       id:"plant.monstera", name:"Monstera", species:"Monstera deliciosa",
       state:"ok", moisture:42, image:true, freshMin:4,
-      batt:"sensor.monstera_battery", battPct:87, battStale:false,
+      batt:"sensor.monstera_battery", battPct:87,
       config:{ display_type:"compact" } },
 
-    { label:"Compact · without image · moisture",
+    { label:"Compact · without image · freshness FRESH (48 min)",
       id:"plant.basilikum", name:"Basil", species:"Ocimum basilicum",
       state:"ok", moisture:42, image:false, freshMin:48,
-      batt:"sensor.basilikum_battery", battPct:64, battStale:false,
+      batt:"sensor.basilikum_battery", battPct:64,
       config:{ display_type:"compact", hide_image:true } },
 
-    { label:"Compact · with image · problem (too dry)",
+    { label:"Compact · with image · problem (too dry) · freshness FRESH (6 min)",
       id:"plant.ficus", name:"Ficus", species:"Ficus lyrata",
       state:"problem", moisture:8, image:true, freshMin:6,
-      batt:"sensor.ficus_battery", battPct:22, battStale:false,
+      batt:"sensor.ficus_battery", battPct:22,
       config:{ display_type:"compact" } },
 
-    { label:"Compact · without image · problem (too dry)",
+    { label:"Compact · without image · problem (too dry) · freshness FRESH (15 min)",
       id:"plant.aloe", name:"Aloe Vera", species:"Aloe barbadensis",
       state:"problem", moisture:8, image:false, freshMin:15,
-      batt:"sensor.aloe_battery", battPct:48, battStale:false,
+      batt:"sensor.aloe_battery", battPct:48,
       config:{ display_type:"compact", hide_image:true } },
 
-    { label:"Compact · with image · battery warning + freshness WARN (130 min)",
+    { label:"Compact · with image · freshness WARN (130 min)",
       id:"plant.orchidee", name:"Orchid", species:"Phalaenopsis",
       state:"ok", moisture:42, image:true, freshMin:130,
-      batt:"sensor.orchidee_battery", battPct:22, battStale:true,
+      batt:"sensor.orchidee_battery", battPct:55,
       config:{ display_type:"compact" } },
 
-    { label:"Compact · without image · low battery · freshness STALE (320 min)",
+    { label:"Compact · without image · freshness STALE (320 min)",
       id:"plant.sukkulente", name:"Succulent", species:"Echeveria",
       state:"ok", moisture:42, image:false, freshMin:320,
-      batt:"sensor.sukkulente_battery", battPct:12, battStale:false,
+      batt:"sensor.sukkulente_battery", battPct:38,
       config:{ display_type:"compact", hide_image:true } },
 
-    { label:"Compact · with image · without species",
+    { label:"Compact · with image · battery stale + freshness STALE (600 min / 10 h)",
       id:"plant.kaktus", name:"Cactus", species:"Cactaceae",
-      state:"ok", moisture:42, image:true, freshMin:20,
-      batt:"sensor.kaktus_battery", battPct:77, battStale:false,
-      config:{ display_type:"compact", hide_species:true } },
+      state:"ok", moisture:42, image:true, freshMin:600,
+      batt:"sensor.kaktus_battery", battPct:77,
+      config:{ display_type:"compact" } },
 
-    { label:"Compact · without image · without species",
+    { label:"Compact · without image · without species · freshness FRESH (90 min)",
       id:"plant.farn", name:"Fern", species:"Nephrolepis",
       state:"ok", moisture:42, image:false, freshMin:90,
-      batt:"sensor.farn_battery", battPct:55, battStale:false,
+      batt:"sensor.farn_battery", battPct:55,
       config:{ display_type:"compact", hide_image:true, hide_species:true } },
 
-    { label:"Compact · with image · without species · problem",
+    { label:"Compact · with image · without species · problem · freshness FRESH (3 min)",
       id:"plant.efeu", name:"Ivy", species:"Hedera helix",
       state:"problem", moisture:8, image:true, freshMin:3,
-      batt:"sensor.efeu_battery", battPct:31, battStale:false,
+      batt:"sensor.efeu_battery", battPct:31,
       config:{ display_type:"compact", hide_species:true } },
   ];
 
@@ -241,22 +247,22 @@
       attributes: { device_class: "battery", unit_of_measurement: "%" },
       last_updated: nowISO(),
     };
-    // Device update sensor (…_battery -> …_updated): controls stale detection
+    // Device update sensor (…_battery -> …_updated):
+    // state = ISO timestamp that drives BOTH freshness badge AND battery-stale detection.
     const updatedId = c.batt.replace(/_battery$/, "_updated");
     states[updatedId] = {
       entity_id: updatedId,
-      state: c.battStale ? hoursAgoISO(12) : nowISO(),
+      state: minutesAgoISO(c.freshMin ?? 0),
       attributes: {},
       last_updated: nowISO(),
     };
-    // Moisture sensor per plant. last_updated controls the freshness badge:
-    // freshMin = "how many minutes ago fresh sensor data last arrived".
+    // Moisture sensor per plant (used for bar display, not for freshness).
     const moistureId = moistureSensorId(c.id);
     states[moistureId] = {
       entity_id: moistureId,
       state: String(c.moisture),
       attributes: { unit_of_measurement: "%" },
-      last_updated: minutesAgoISO(c.freshMin ?? 0),
+      last_updated: nowISO(),
     };
   }
 
