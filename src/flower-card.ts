@@ -157,7 +157,10 @@ export default class FlowerCard extends LitElement {
         // Problem-State wenn Plant-State "problem" ist ODER Battery stale ist
         const hasPlantProblem = this.stateObj.state.toLowerCase() === "problem";
         const hasBatteryProblem = isBatteryStale;
-        const problemClass = (hasPlantProblem || hasBatteryProblem) ? "problem-state" : "";
+        // Pflanzenproblem hat Vorrang (rötlich); reines Batterieproblem -> orangelich
+        const problemClass = hasPlantProblem
+            ? "problem-state"
+            : (hasBatteryProblem ? "battery-warning-state" : "");
         const haCardCssClass = `${baseCardClass} ${problemClass}`.trim();
 
         return html`
