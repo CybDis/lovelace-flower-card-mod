@@ -85,6 +85,48 @@ export const renderBattery = (card: FlowerCard): { html: TemplateResult, isStale
         isStale: isStale
     };
 }
+export const renderSensorFreshness = (card: FlowerCard): { html: TemplateResult } => {
+    // Sammle die Sensor-Entities der angezeigten Pflanzen-Attribute
+    const monitored = card.config.show_bars || default_show_bars;
+    const sensorIds: string[] = [];
+    if (card.plantinfo && card.plantinfo.result) {
+        for (const elem of monitored) {
+            const r = card.plantinfo.result[elem];
+            if (r && r.sensor) sensorIds.push(String(r.sensor));
+        }
+    }
+
+    // Neuesten last_updated-Zeitstempel über alle Sensoren ermitteln
+    // (= "wann hat die Pflanze zuletzt frische Daten gesendet")
+    let newest: number | null = null;
+    for (const id of sensorIds) {
+        const st = card._hass.states[id];
+        if (!st) continue;
+        const t = new Date(st.last_updated).getTime();
+        if (isNaN(t)) continue;
+        if (newest === null || t > newest) newest = t;
+    }
+
+    // Fehlender oder ungültiger Zeitstempel -> neutrale graue Badge
+    if (newest === null) {
+        return {
+            html: html`<div class="freshness-badge unknown" title="Kein Update-Zeitstempel verfügbar">—</div>`
+        };
+    }
+
+    const minutes = Math.max(0, Math.floor((Date.now() - newest) / 60000));
+
+    // Farblogik: bis 90 min dezent grün, 91-180 min Warnung, darüber veraltet
+    let level: string;
+    if (minutes <= 90) level = "fresh";
+    else if (minutes <= 180) level = "warn";
+    else level = "stale";
+
+    return {
+        html: html`<div class="freshness-badge ${level}" title="Letztes Sensor-Update vor ${minutes} min">${minutes}m</div>`
+    };
+};
+
 export const renderAttributes = (card: FlowerCard): TemplateResult[] => {
     const icons: Icons = {};
     const uom: UOM = {};

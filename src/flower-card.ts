@@ -5,7 +5,7 @@ import { HomeAssistant } from 'custom-card-helpers';
 import { style } from './styles';
 import { DisplayType, FlowerCardConfig, HomeAssistantEntity, PlantInfo } from './types/flower-card-types';
 import * as packageJson from '../package.json';
-import { renderAttributes, renderBattery } from './utils/attributes';
+import { renderAttributes, renderBattery, renderSensorFreshness } from './utils/attributes';
 import { CARD_NAME, default_show_bars, missingImage } from './utils/constants';
 import { moreInfo } from './utils/utils';
 
@@ -32,8 +32,25 @@ export default class FlowerCard extends LitElement {
 
     private stateObj: HomeAssistantEntity | undefined;
     private previousFetchDate: number;
+    private _freshnessTimer?: number;
 
     plantinfo: PlantInfo;
+
+    connectedCallback(): void {
+        super.connectedCallback();
+        // Minutenanzeige fortlaufend aktualisieren, auch ohne neue Sensordaten
+        if (!this._freshnessTimer) {
+            this._freshnessTimer = window.setInterval(() => this.requestUpdate(), 60000);
+        }
+    }
+
+    disconnectedCallback(): void {
+        super.disconnectedCallback();
+        if (this._freshnessTimer) {
+            window.clearInterval(this._freshnessTimer);
+            this._freshnessTimer = undefined;
+        }
+    }
     set hass(hass: HomeAssistant) {
         this._hass = hass;
         this.stateObj = this.config?.entity ? hass.states[this.config.entity] : undefined;
@@ -153,6 +170,9 @@ export default class FlowerCard extends LitElement {
         // Prüfe Battery-Status für Problem-State
         const batteryResult = renderBattery(this);
         const isBatteryStale = batteryResult.isStale;
+
+        // Aktualitäts-Badge (Minuten seit letztem Sensor-Update)
+        const freshnessResult = renderSensorFreshness(this);
         
         // Problem-State wenn Plant-State "problem" ist ODER Battery stale ist
         const hasPlantProblem = this.stateObj.state.toLowerCase() === "problem";
@@ -172,6 +192,7 @@ export default class FlowerCard extends LitElement {
                 ? "alert-circle-outline" : ""
             }"></ha-icon>
                 </span>
+                <span id="sensor-freshness">${freshnessResult.html}</span>
                 <span id="battery">${batteryResult.html}</span>
                 ${!hideSpecies ? html`<span id="species">${species} </span>` : ''}
             </div>
