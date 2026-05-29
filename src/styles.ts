@@ -9,6 +9,11 @@ export const style = css`
   border: 2px solid rgba(244, 67, 54, 0.8) !important;
   box-shadow: 0 0 8px rgba(244, 67, 54, 0.4) !important;
 }
+.battery-warning-state {
+  background-color: rgba(255, 152, 0, 0.3) !important;
+  border: 2px solid rgba(255, 152, 0, 0.8) !important;
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.4) !important;
+}
 .attributes {
   display: flex;
   white-space: nowrap;
