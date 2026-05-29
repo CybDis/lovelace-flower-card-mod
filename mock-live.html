@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flower Card — LIVE Mock (real flower-card.js)</title>
+
+<!-- Iconify: provides real MDI SVGs for <ha-icon> (CDN, gets cached) -->
+<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+
+<style>
+  :root {
+    --page-bg: #f2f3f5;
+    --page-fg: #212121;
+    /* HA variables used by ha-card / the card */
+    --ha-card-background: #ffffff;
+    --card-background-color: #ffffff;
+    --primary-text-color: #212121;
+    --secondary-text-color: #727272;
+    --ha-card-border-radius: 12px;
+    --ha-card-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+    --warning-color: #ff9800;
+    --mdc-icon-size: 24px;
+  }
+  body.dark {
+    --page-bg: #111418;
+    --page-fg: #e1e1e1;
+    --ha-card-background: #1c1c1c;
+    --card-background-color: #1c1c1c;
+    --primary-text-color: #e1e1e1;
+    --secondary-text-color: #9b9b9b;
+    --ha-card-box-shadow: none;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, Roboto, "Segoe UI", sans-serif;
+    background: var(--page-bg); color: var(--page-fg); padding: 24px;
+  }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .subtitle { opacity: .6; margin: 0 0 8px; font-size: .9rem; }
+  .note { opacity:.6; font-size:.8rem; margin:0 0 24px; }
+  .toolbar { margin-bottom: 28px; display:flex; gap:12px; flex-wrap:wrap; }
+  .toolbar button {
+    border:1px solid currentColor; background:transparent; color:inherit;
+    padding:6px 14px; border-radius:8px; cursor:pointer; font-size:.85rem;
+  }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 28px; align-items: start;
+  }
+  .card-label {
+    font-size:.8rem; opacity:.55; margin: 0 0 12px 4px;
+    text-transform: uppercase; letter-spacing:.05em;
+  }
+</style>
+</head>
+<body>
+  <h1>🌸 Flower Card — LIVE Mock</h1>
+  <p class="subtitle">Renders the <strong>real built <code>flower-card.js</code></strong> with a stub <code>hass</code> object. Changes to the source appear automatically after <code>npm run dev</code>/<code>build</code>.</p>
+  <p class="note">HA web components (<code>ha-card</code>, <code>ha-icon</code>, <code>hui-warning</code>) are minimally stubbed. Icons via Iconify CDN.</p>
+  <div class="toolbar">
+    <button id="themeBtn">🌓 Toggle theme</button>
+  </div>
+  <div class="grid" id="grid"></div>
+
+<!-- ===================================================================
+     1) Stub the HA web components (BEFORE the card loads)
+==================================================================== -->
+<script>
+  // --- ha-card: styled container with its own shadow DOM ---
+  class HaCard extends HTMLElement {
+    constructor() {
+      super();
+      const root = this.attachShadow({ mode: "open" });
+      root.innerHTML = `
+        <style>
+          :host {
+            display: block;
+            background: var(--ha-card-background, var(--card-background-color, #fff));
+            border-radius: var(--ha-card-border-radius, 12px);
+            box-shadow: var(--ha-card-box-shadow, none);
+            color: var(--primary-text-color, #212121);
+            transition: all .3s ease-out;
+          }
+        </style>
+        <slot></slot>`;
+    }
+  }
+  customElements.define("ha-card", HaCard);
+
+  // --- ha-icon: renders a real MDI SVG via <iconify-icon> ---
+  class HaIcon extends HTMLElement {
+    set icon(v) { this._icon = v; this._update(); }
+    get icon() { return this._icon; }
+    connectedCallback() {
+      if (!this._icon && this.getAttribute("icon")) this._icon = this.getAttribute("icon");
+      this._update();
+    }
+    _update() {
+      if (!this.isConnected) return;
+      this.style.display = "inline-flex";
+      this.style.alignItems = "center";
+      this.style.justifyContent = "center";
+      this.style.width = "var(--mdc-icon-size, 24px)";
+      this.style.height = "var(--mdc-icon-size, 24px)";
+      this.innerHTML = this._icon
+        ? `<iconify-icon icon="${this._icon}" style="font-size:var(--mdc-icon-size,24px);color:inherit;"></iconify-icon>`
+        : "";
+    }
+  }
+  customElements.define("ha-icon", HaIcon);
+
+  // --- hui-warning: simple error container ---
+  class HuiWarning extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: "open" }).innerHTML =
+        `<style>:host{display:block;padding:8px;color:#fff;background:#db4437;border-radius:4px;}</style><slot></slot>`;
+    }
+  }
+  customElements.define("hui-warning", HuiWarning);
+</script>
+
+<!-- ===================================================================
+     2) Load the REAL card (registers <flower-card>)
+==================================================================== -->
+<script src="./flower-card.js"></script>
+
+<!-- ===================================================================
+     3) Build stub hass + instantiate cards
+==================================================================== -->
+<script>
+  const PLANT_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8fd14f"/><stop offset="1" stop-color="#3a7d2c"/>
+      </linearGradient></defs>
+      <rect width="120" height="120" fill="url(#g)"/>
+      <text x="60" y="78" font-size="56" text-anchor="middle">🌿</text>
+    </svg>`);
+
+  const nowISO = () => new Date().toISOString();
+  const hoursAgoISO = (h) => new Date(Date.now() - h * 3600 * 1000).toISOString();
+  const minutesAgoISO = (m) => new Date(Date.now() - m * 60 * 1000).toISOString();
+
+  // Moisture sensor ID per plant (plant.monstera -> sensor.monstera_moisture)
+  const moistureSensorId = (plantId) => "sensor." + plantId.split(".")[1] + "_moisture";
+
+  // A plant/get_info result for just the moisture sensor.
+  // The "sensor" field references the real state, whose last_updated
+  // is evaluated by the freshness badge (renderSensorFreshness).
+  const moistureResult = (current, sensorId) => ({
+    result: {
+      moisture: {
+        max: 60, min: 15, current,
+        icon: "mdi:water-percent",
+        sensor: sensorId,
+        unit_of_measurement: "%",
+      },
+    },
+  });
+
+  /* ---------------------------------------------------------------
+     Test cards (compact, with/without image, primarily moisture)
+  --------------------------------------------------------------- */
+  const CARDS = [
+    { label:"Compact · with image · moisture",
+      id:"plant.monstera", name:"Monstera", species:"Monstera deliciosa",
+      state:"ok", moisture:42, image:true, freshMin:4,
+      batt:"sensor.monstera_battery", battPct:87, battStale:false,
+      config:{ display_type:"compact" } },
+
+    { label:"Compact · without image · moisture",
+      id:"plant.basilikum", name:"Basil", species:"Ocimum basilicum",
+      state:"ok", moisture:42, image:false, freshMin:48,
+      batt:"sensor.basilikum_battery", battPct:64, battStale:false,
+      config:{ display_type:"compact", hide_image:true } },
+
+    { label:"Compact · with image · problem (too dry)",
+      id:"plant.ficus", name:"Ficus", species:"Ficus lyrata",
+      state:"problem", moisture:8, image:true, freshMin:6,
+      batt:"sensor.ficus_battery", battPct:22, battStale:false,
+      config:{ display_type:"compact" } },
+
+    { label:"Compact · without image · problem (too dry)",
+      id:"plant.aloe", name:"Aloe Vera", species:"Aloe barbadensis",
+      state:"problem", moisture:8, image:false, freshMin:15,
+      batt:"sensor.aloe_battery", battPct:48, battStale:false,
+      config:{ display_type:"compact", hide_image:true } },
+
+    { label:"Compact · with image · battery warning + freshness WARN (130 min)",
+      id:"plant.orchidee", name:"Orchid", species:"Phalaenopsis",
+      state:"ok", moisture:42, image:true, freshMin:130,
+      batt:"sensor.orchidee_battery", battPct:22, battStale:true,
+      config:{ display_type:"compact" } },
+
+    { label:"Compact · without image · low battery · freshness STALE (320 min)",
+      id:"plant.sukkulente", name:"Succulent", species:"Echeveria",
+      state:"ok", moisture:42, image:false, freshMin:320,
+      batt:"sensor.sukkulente_battery", battPct:12, battStale:false,
+      config:{ display_type:"compact", hide_image:true } },
+
+    { label:"Compact · with image · without species",
+      id:"plant.kaktus", name:"Cactus", species:"Cactaceae",
+      state:"ok", moisture:42, image:true, freshMin:20,
+      batt:"sensor.kaktus_battery", battPct:77, battStale:false,
+      config:{ display_type:"compact", hide_species:true } },
+
+    { label:"Compact · without image · without species",
+      id:"plant.farn", name:"Fern", species:"Nephrolepis",
+      state:"ok", moisture:42, image:false, freshMin:90,
+      batt:"sensor.farn_battery", battPct:55, battStale:false,
+      config:{ display_type:"compact", hide_image:true, hide_species:true } },
+
+    { label:"Compact · with image · without species · problem",
+      id:"plant.efeu", name:"Ivy", species:"Hedera helix",
+      state:"problem", moisture:8, image:true, freshMin:3,
+      batt:"sensor.efeu_battery", battPct:31, battStale:false,
+      config:{ display_type:"compact", hide_species:true } },
+  ];
+
+  /* ---------------------------------------------------------------
+     Shared states object (all plants + battery and _updated sensors)
+  --------------------------------------------------------------- */
+  const states = {};
+  for (const c of CARDS) {
+    states[c.id] = {
+      entity_id: c.id,
+      state: c.state,
+      attributes: {
+        friendly_name: c.name,
+        species: c.species,
+        entity_picture: c.image ? PLANT_IMG : undefined,
+      },
+      last_updated: nowISO(),
+    };
+    // Battery sensor
+    states[c.batt] = {
+      entity_id: c.batt,
+      state: String(c.battPct),
+      attributes: { device_class: "battery", unit_of_measurement: "%" },
+      last_updated: nowISO(),
+    };
+    // Device update sensor (…_battery -> …_updated): controls stale detection
+    const updatedId = c.batt.replace(/_battery$/, "_updated");
+    states[updatedId] = {
+      entity_id: updatedId,
+      state: c.battStale ? hoursAgoISO(12) : nowISO(),
+      attributes: {},
+      last_updated: nowISO(),
+    };
+    // Moisture sensor per plant. last_updated controls the freshness badge:
+    // freshMin = "how many minutes ago fresh sensor data last arrived".
+    const moistureId = moistureSensorId(c.id);
+    states[moistureId] = {
+      entity_id: moistureId,
+      state: String(c.moisture),
+      attributes: { unit_of_measurement: "%" },
+      last_updated: minutesAgoISO(c.freshMin ?? 0),
+    };
+  }
+
+  // Per plant the matching moisture value + sensor ID for callWS
+  const cardByEntity = Object.fromEntries(CARDS.map(c => [c.id, c]));
+
+  /* ---------------------------------------------------------------
+     Stub hass — minimal HomeAssistant interface
+  --------------------------------------------------------------- */
+  const hass = {
+    states,
+    language: "en",
+    localize: (key) => (key && key.includes("unavailable") ? "Not available" : key),
+    callWS: async ({ type, entity_id }) => {
+      if (type === "plant/get_info") {
+        const c = cardByEntity[entity_id];
+        return moistureResult(c?.moisture ?? 42, moistureSensorId(entity_id));
+      }
+      return {};
+    },
+  };
+
+  /* ---------------------------------------------------------------
+     Instantiate cards
+  --------------------------------------------------------------- */
+  function mount() {
+    const grid = document.getElementById("grid");
+    for (const c of CARDS) {
+      const wrap = document.createElement("div");
+      const label = document.createElement("p");
+      label.className = "card-label";
+      label.textContent = c.label;
+      wrap.appendChild(label);
+
+      const card = document.createElement("flower-card");
+      card.setConfig({
+        type: "custom:flower-card",
+        entity: c.id,
+        battery_sensor: c.batt,
+        show_bars: ["moisture"],
+        ...c.config,
+      });
+      card.hass = hass; // triggers fetch + render
+      wrap.appendChild(card);
+      grid.appendChild(wrap);
+    }
+  }
+
+  // Make sure <flower-card> is registered before we mount
+  if (customElements.get("flower-card")) {
+    mount();
+  } else {
+    customElements.whenDefined("flower-card").then(mount);
+  }
+
+  document.getElementById("themeBtn").addEventListener("click", () =>
+    document.body.classList.toggle("dark")
+  );
+</script>
+</body>
+</html>
