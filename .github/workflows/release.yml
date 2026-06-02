@@ -39,8 +39,8 @@ jobs:
     steps:
       # SCHRITT 1: Code aus Repository auschecken
       - name: "Checkout code"
-        uses: actions/checkout@v4
-        with: 
+        uses: actions/checkout@v5
+        with:
           path: './'
           
       # SCHRITT 2: Versionsnummer aus package.json extrahieren
@@ -52,7 +52,7 @@ jobs:
       # SCHRITT 3: Prüfen ob bereits ein Git-Tag für diese Version existiert
       # Verhindert doppelte Releases für dieselbe Version
       - name: "Check if tag exists already"
-        uses: mukunku/tag-exists-action@v1.6.0
+        uses: mukunku/tag-exists-action@v1.7.0
         id: "check_tag"
         with: 
           tag: "v${{ env.COMPONENT_VERSION }}"
@@ -70,7 +70,7 @@ jobs:
  
       # SCHRITT 5: Node.js Umgebung einrichten für Build-Prozess
       - name: "Build using Node.js"
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20.x'
           
@@ -92,7 +92,7 @@ jobs:
       # SCHRITT 9: Änderungen zurück ins Repository pushen
       # Build-Artefakte werden für Release verfügbar gemacht
       - name: "Push changes"
-        uses: ad-m/github-push-action@v0.8.0
+        uses: ad-m/github-push-action@v1.3.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
   
@@ -103,11 +103,17 @@ jobs:
     name: "Auto Release"
     runs-on: "ubuntu-latest"
     needs: build  # Wartet bis Build-Job erfolgreich abgeschlossen ist
+    # pozetroninc/github-action-get-latest-release hat (Stand v0.8.0) noch keine
+    # Node-24-Version. Mit diesem Flag wird die Action vorzeitig auf Node 24
+    # ausgeführt (ab 16.06.2026 ohnehin der Standard) und die Deprecation-Warnung
+    # verschwindet. Betrifft nur diese Action; alle anderen laufen bereits nativ auf Node 24.
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       # SCHRITT 1: Aktuellen Code auschecken (mit Build-Artefakten)
       - name: "Checkout new code"
-        uses: actions/checkout@v4
-        with: 
+        uses: actions/checkout@v5
+        with:
           ref: master  # Explizit master branch um Build-Artefakte zu erhalten
           path: './'
 
@@ -123,7 +129,7 @@ jobs:
 
       # SCHRITT 4: Erneute Tag-Prüfung (Sicherheitscheck)
       - name: "Check if tag exists already"
-        uses: mukunku/tag-exists-action@v1.6.0
+        uses: mukunku/tag-exists-action@v1.7.0
         id: "check_tag"
         with: 
           tag: "v${{ env.COMPONENT_VERSION }}"
@@ -188,7 +194,7 @@ jobs:
       # SCHRITT 9a: Stabiles Release erstellen (für normale Versionen)
       # Wird nur ausgeführt wenn Version NICHT "beta" enthält
       - name: Create Stable release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           prerelease: false  # Markiert als stabile Version
           body_path: release_notes.md
@@ -200,7 +206,7 @@ jobs:
       # SCHRITT 9b: Beta-Release erstellen (für Beta-Versionen)
       # Wird nur ausgeführt wenn Version "beta" enthält
       - name: Create Beta release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           prerelease: true  # Markiert als Vorabversion
           body_path: release_notes.md
