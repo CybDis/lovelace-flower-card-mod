@@ -43,8 +43,20 @@ export const renderBattery = (card: FlowerCard): { html: TemplateResult, isStale
         // Format: "2018-05-28T16:00:13Z"
         const deviceTimestamp = deviceUpdateSensor.state;
         const parsedDate = new Date(deviceTimestamp);
-        if (!isNaN(parsedDate.getTime())) {
+        // Wenn der Sensor den Timeserver nicht erreicht, meldet er das Zeit-Minimum
+        // (1.1.1970). Ein unrealistisch altes Jahr gilt daher als ungültiger Wert.
+        const EPOCH_YEAR_THRESHOLD = 2000;
+        if (!isNaN(parsedDate.getTime()) && parsedDate.getFullYear() >= EPOCH_YEAR_THRESHOLD) {
+            // Gültiger Zeitserver-Wert
             lastUpdated = parsedDate;
+        } else {
+            // Zeit-Minimum (1970) -> Wert verwerfen, stattdessen das Änderungsdatum
+            // (last_changed) des _updated-Sensors verwenden
+            const changed = new Date(deviceUpdateSensor.last_changed);
+            if (!isNaN(changed.getTime())) {
+                lastUpdated = changed;
+            }
+            // sonst: bestehender Fallback battery_sensor.last_updated bleibt
         }
     }
     
@@ -99,8 +111,17 @@ export const renderSensorFreshness = (card: FlowerCard): { html: TemplateResult 
 
         const deviceUpdateSensor = card._hass.states[deviceUpdateEntityId];
         if (deviceUpdateSensor) {
-            const t = new Date(deviceUpdateSensor.state).getTime();
-            if (!isNaN(t)) newest = t;
+            const parsed = new Date(deviceUpdateSensor.state);
+            // Wenn der Sensor den Timeserver nicht erreicht, meldet er das
+            // Zeit-Minimum (1.1.1970). In dem Fall den Wert verwerfen und das
+            // Änderungsdatum (last_changed) des _updated-Sensors verwenden.
+            const EPOCH_YEAR_THRESHOLD = 2000;
+            if (!isNaN(parsed.getTime()) && parsed.getFullYear() >= EPOCH_YEAR_THRESHOLD) {
+                newest = parsed.getTime();
+            } else {
+                const changed = new Date(deviceUpdateSensor.last_changed).getTime();
+                if (!isNaN(changed)) newest = changed;
+            }
         }
 
         // Fallback: last_updated des Batteriesensors selbst
