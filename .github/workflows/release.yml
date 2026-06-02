@@ -177,13 +177,21 @@ jobs:
           maxIssues: 50
           excludeLabels: "duplicate,question,invalid,wontfix"
 
+      # SCHRITT 8b: Changelog in Datei schreiben und URL-Kodierung (%0a) dekodieren
+      # GitHub Actions kodiert Zeilenumbrüche in Step-Outputs als %0a/%0d
+      - name: "Write changelog to file"
+        env:
+          CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+        run: |
+          printf '%s' "$CHANGELOG" | sed 's/%0[aA]/\n/g; s/%0[dD]//g' > release_notes.md
+
       # SCHRITT 9a: Stabiles Release erstellen (für normale Versionen)
       # Wird nur ausgeführt wenn Version NICHT "beta" enthält
       - name: Create Stable release
         uses: softprops/action-gh-release@v2
         with:
           prerelease: false  # Markiert als stabile Version
-          body: "${{ steps.changelog.outputs.changelog }}"
+          body_path: release_notes.md
           name: "Version ${{ env.COMPONENT_VERSION }}"
           tag_name: "v${{ env.COMPONENT_VERSION }}"
           target_commitish: "${{ env.CURRENT_SHA }}"
@@ -195,7 +203,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           prerelease: true  # Markiert als Vorabversion
-          body: "${{ steps.changelog.outputs.changelog }}"
+          body_path: release_notes.md
           name: "Version ${{ env.COMPONENT_VERSION }}"
           tag_name: "v${{ env.COMPONENT_VERSION }}"
           target_commitish: "${{ env.CURRENT_SHA }}"
