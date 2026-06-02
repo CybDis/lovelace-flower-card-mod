@@ -217,6 +217,23 @@
       state:"problem", moisture:8, image:true, freshMin:3,
       batt:"sensor.efeu_battery", battPct:31, battStale:false,
       config:{ display_type:"compact", hide_species:true } },
+
+    // --- 1970 / time-minimum scenarios (timeserver unreachable) -------------
+    // The _updated sensor reports the epoch value (1970). The fix should
+    // discard that value and fall back to the sensor's last_changed instead.
+    { label:"1970 time-minimum · last_changed RECENT (5 min) → NOT stale (fix works)",
+      id:"plant.epochfresh", name:"Epoch Fresh", species:"Timeserver down",
+      state:"ok", moisture:42, image:true, freshMin:5,
+      batt:"sensor.epochfresh_battery", battPct:66,
+      battEpoch:true, updatedChangedMin:5,
+      config:{ display_type:"compact" } },
+
+    { label:"1970 time-minimum · last_changed OLD (12 h) → stale (correctly stale)",
+      id:"plant.epochstale", name:"Epoch Stale", species:"Timeserver down",
+      state:"ok", moisture:42, image:false, freshMin:5,
+      batt:"sensor.epochstale_battery", battPct:60,
+      battEpoch:true, updatedChangedMin:720,
+      config:{ display_type:"compact", hide_image:true } },
   ];
 
   /* ---------------------------------------------------------------
@@ -241,13 +258,23 @@
       attributes: { device_class: "battery", unit_of_measurement: "%" },
       last_updated: nowISO(),
     };
-    // Device update sensor (…_battery -> …_updated): controls stale detection
+    // Device update sensor (…_battery -> …_updated): controls stale detection.
+    // state = timeserver timestamp, OR the 1970 time-minimum (c.battEpoch)
+    // when the device cannot reach the timeserver.
     const updatedId = c.batt.replace(/_battery$/, "_updated");
+    const updatedState = c.battEpoch
+      ? "1970-01-01T00:00:00Z"
+      : (c.battStale ? hoursAgoISO(12) : nowISO());
     states[updatedId] = {
       entity_id: updatedId,
-      state: c.battStale ? hoursAgoISO(12) : nowISO(),
+      state: updatedState,
       attributes: {},
       last_updated: nowISO(),
+      // last_changed = when this sensor's value last changed. Used as the
+      // fallback when the state is the 1970 time-minimum.
+      last_changed: c.updatedChangedMin != null
+        ? minutesAgoISO(c.updatedChangedMin)
+        : nowISO(),
     };
     // Moisture sensor per plant. last_updated controls the freshness badge:
     // freshMin = "how many minutes ago fresh sensor data last arrived".
