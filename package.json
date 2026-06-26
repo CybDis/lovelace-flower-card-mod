@@ -10,6 +10,7 @@
   ],
   "module": "flower-card.js",
   "license": "MIT",
+  "private": false,
   "dependencies": {
     "@babel/preset-env": "^7.28.3",
     "@marcokreeft/ha-editor-formbuilder": "^2024.9.1",
