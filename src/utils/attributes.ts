@@ -65,6 +65,16 @@ export const renderBattery = (card: FlowerCard): { html: TemplateResult, isStale
     const timeSinceUpdate = Math.floor((now.getTime() - lastUpdated.getTime()) / 1000 / 60); // in Minuten
     isStale = timeSinceUpdate > 540 || battery_sensor.state === 'unavailable' || battery_sensor.state === 'unknown'; // 9 Stunden = 540 Minuten
 
+    // Prüfe Charging-Status: sensor.*_charging mit State "charging"
+    const chargingEntityId = batteryEntityId.replace(/_battery$/, '_charging');
+    let isCharging = false;
+    if (chargingEntityId !== batteryEntityId) {
+        const chargingSensor = card._hass.states[chargingEntityId];
+        if (chargingSensor && chargingSensor.state.toLowerCase() === 'charging') {
+            isCharging = true;
+        }
+    }
+
     const levels = [
         { threshold: 90, icon: "mdi:battery", color: "green" },
         { threshold: 80, icon: "mdi:battery-90", color: "green" },
@@ -79,10 +89,26 @@ export const renderBattery = (card: FlowerCard): { html: TemplateResult, isStale
         { threshold: -Infinity, icon: "mdi:battery-alert-variant-outline", color: "red" },
     ];
 
+    const chargingLevels = [
+        { threshold: 90, icon: "mdi:battery-charging-100" },
+        { threshold: 80, icon: "mdi:battery-charging-90" },
+        { threshold: 70, icon: "mdi:battery-charging-80" },
+        { threshold: 60, icon: "mdi:battery-charging-60" },
+        { threshold: 50, icon: "mdi:battery-charging-50" },
+        { threshold: 40, icon: "mdi:battery-charging-40" },
+        { threshold: 30, icon: "mdi:battery-charging-30" },
+        { threshold: 20, icon: "mdi:battery-charging-20" },
+        { threshold: -Infinity, icon: "mdi:battery-charging-10" },
+    ];
+
     let { icon, color } = levels.find(({ threshold }) => state > threshold) ||  { icon: "mdi:battery-alert-variant-outline", color: "red" };
-    
-    // Überschreibe Icon und Farbe bei veralteten Daten
-    if (isStale) {
+
+    // Charging hat Vorrang: blaues Lade-Icon
+    if (isCharging) {
+        icon = chargingLevels.find(({ threshold }) => state > threshold)?.icon ?? "mdi:battery-charging-10";
+        color = "var(--info-color, #039be5)";
+    } else if (isStale) {
+        // Überschreibe Icon und Farbe bei veralteten Daten (nur wenn nicht charging)
         icon = "mdi:battery-alert";
         color = "var(--warning-color, orange)";
     }
