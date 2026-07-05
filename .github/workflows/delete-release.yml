@@ -1,0 +1,33 @@
+# GitHub Actions Workflow: Release manuell löschen (Rollback)
+#
+# Löscht per workflow_dispatch ein einzelnes Release samt Git-Tag —
+# z.B. um ein fehlerhaftes stabiles Release zurückzurollen, bevor eine
+# korrigierte Version veröffentlicht wird. Nur manuell startbar.
+---
+name: "Delete Release"
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag des zu löschenden Releases (z.B. v2026.7.5)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  delete:
+    name: "Delete release and tag"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Delete release and tag"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          echo "Lösche Release und Tag: $TAG"
+          gh release delete "$TAG" --repo "${{ github.repository }}" --cleanup-tag --yes || true
+          # Falls kein Release (mehr) existiert: Tag separat löschen
+          gh api -X DELETE "repos/${{ github.repository }}/git/refs/tags/$TAG" || true
