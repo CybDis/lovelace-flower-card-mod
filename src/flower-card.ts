@@ -196,7 +196,7 @@ export default class FlowerCard extends LitElement {
                 <span id="battery">${batteryResult.html}</span>
                 ${!hideSpecies ? html`<span id="species">${species} </span>` : ''}
             </div>
-            <div class="divider"></div>
+            ${this.config.display_type !== DisplayType.Compact ? html`<div class="divider"></div>` : ''}
             ${renderAttributes(this)}
             </ha-card>
             `;
