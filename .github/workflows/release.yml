@@ -233,3 +233,14 @@ jobs:
           tag_name: "v${{ env.COMPONENT_VERSION }}"
           target_commitish: "${{ env.CURRENT_SHA }}"
         if: contains(env.COMPONENT_VERSION, 'beta') == true
+
+      # SCHRITT 10: Beta-Bereinigung nach stabilem Release direkt anstoßen.
+      # Nötig, weil mit GITHUB_TOKEN erzeugte Releases den
+      # "release: released"-Trigger von cleanup-betas.yml NICHT auslösen
+      # (GitHub-Rekursionsschutz). Daher wird der Cleanup-Workflow hier
+      # explizit per workflow_dispatch gestartet.
+      - name: "Trigger beta cleanup after stable release"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run cleanup-betas.yml --repo "${{ github.repository }}" --ref master
+        if: contains(env.COMPONENT_VERSION, 'beta') == false
