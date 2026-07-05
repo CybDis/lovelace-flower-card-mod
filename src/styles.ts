@@ -105,13 +105,14 @@ export const style = css`
 }
 .header-compact {
   padding-top: 4px;
-  height: 50px;
+  height: 45px;
   position: relative;
 }
 /* Ohne Trennlinie im Compact-Modus rücken die Sensorwerte direkt an
    den Header (Titel/Batterie) heran, damit die Karte niedriger wird. */
 .header-compact + .attributes {
   padding-top: 0;
+  margin-top: -5px;
 }
 .attribute .header, .attribute .header-compact {
   height: auto;
@@ -130,8 +131,8 @@ export const style = css`
 }
 .header-compact > img {
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   object-fit: cover;
   margin-left: 8px;
   margin-right: 8px;
