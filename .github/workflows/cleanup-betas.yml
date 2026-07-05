@@ -1,0 +1,44 @@
+# GitHub Actions Workflow: Beta-Bereinigung nach stabilem Release
+#
+# Gemäß AGENTS.md werden nach jedem stabilen Release alle Beta-Releases
+# und die zugehörigen Beta-Git-Tags gelöscht. Dieser Workflow übernimmt
+# das automatisch:
+#
+# - Trigger "release: released" feuert nur bei stabilen Releases
+#   (Pre-Releases lösen ihn nicht aus).
+# - Zusätzlich kann er manuell per workflow_dispatch gestartet werden.
+#
+# Gelöscht werden alle als Pre-Release markierten Releases, deren Tag
+# "-beta." enthält — jeweils Release UND Git-Tag. Stabile Releases
+# bleiben unangetastet.
+---
+name: "Cleanup Beta Releases"
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    name: "Delete beta releases and tags"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Delete all beta pre-releases and their tags"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tags=$(gh release list --repo "${{ github.repository }}" --limit 100 \
+            --json tagName,isPrerelease \
+            --jq '.[] | select(.isPrerelease and (.tagName | contains("-beta."))) | .tagName')
+          if [ -z "$tags" ]; then
+            echo "Keine Beta-Releases vorhanden — nichts zu tun."
+            exit 0
+          fi
+          for tag in $tags; do
+            echo "Lösche Beta-Release und Tag: $tag"
+            gh release delete "$tag" --repo "${{ github.repository }}" --cleanup-tag --yes
+          done

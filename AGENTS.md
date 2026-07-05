@@ -77,6 +77,12 @@ Versionsnummer in `package.json` steuert alles.
 - Zu löschen sind jeweils beides: das GitHub-Release **und** der
   Git-Tag (`v<version>`).
 - Das stabile Release und sein Tag bleiben selbstverständlich bestehen.
+- **Automatisiert:** Der Workflow `.github/workflows/cleanup-betas.yml`
+  erledigt dieses Aufräumen automatisch nach jedem stabilen Release
+  (Trigger `release: released`); er löscht alle Pre-Releases mit
+  `-beta.`-Tag samt Tags. Er kann bei Bedarf auch manuell per
+  `workflow_dispatch` gestartet werden. Nach einem stabilen Release nur
+  noch kontrollieren, dass die Betas verschwunden sind.
 
 ### Zusammengefasster Ablauf
 
