@@ -96,5 +96,12 @@ Maintainer sagt „Release" → Version auf JJJJ.M.T (ohne beta) setzen
 - Feature-Arbeit erfolgt auf Branches. Beta-Releases entstehen direkt
   beim Push auf den Branch (sofern `package.json` geändert wurde);
   stabile Releases entstehen nur durch Push/Merge auf `master`.
+- **Wichtig — nach jedem Push mit (Beta-)Release zuerst pullen:** Der
+  automatische Release-Workflow erzeugt und ändert selbst Dateien und
+  pusht sie als eigenen Commit (z.B. „Add new build" mit den
+  Build-Artefakten) auf den auslösenden Branch. Nach einem Push, der ein
+  Release auslöst, muss daher vor dem nächsten Commit oder PR immer erst
+  gepullt werden (`git pull`), um keine Konflikte oder abgelehnte Pushes
+  zu provozieren.
 - Commit-Messages klar und beschreibend halten; bei Versionserhöhungen
   die Version in der Message nennen (z.B. `release: 2026.7.5-beta.2`).
