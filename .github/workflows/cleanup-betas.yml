@@ -42,3 +42,19 @@ jobs:
             echo "Lösche Beta-Release und Tag: $tag"
             gh release delete "$tag" --repo "${{ github.repository }}" --cleanup-tag --yes
           done
+
+      # Beta-Tags ohne zugehöriges Release (Altlasten) werden von
+      # "gh release delete" nicht erfasst und separat gelöscht.
+      - name: "Delete orphaned beta tags"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          refs=$(gh api "repos/${{ github.repository }}/git/matching-refs/tags/" --paginate --jq '.[].ref' | grep -- '-beta\.' || true)
+          if [ -z "$refs" ]; then
+            echo "Keine verwaisten Beta-Tags vorhanden — nichts zu tun."
+            exit 0
+          fi
+          for ref in $refs; do
+            echo "Lösche verwaisten Beta-Tag: $ref"
+            gh api -X DELETE "repos/${{ github.repository }}/git/refs/${ref#refs/}"
+          done
