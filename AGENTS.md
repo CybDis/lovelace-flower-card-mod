@@ -35,12 +35,14 @@ JJJJ.M.T-beta.N    → Beta-/Vorabversion,     z.B. 2026.7.5-beta.1
   Datum hochgezählt wird (`-beta.1`, `-beta.2`, …).
 
 **Der Release-Prozess ist automatisiert:** Der Workflow
-`.github/workflows/release.yml` läuft bei jedem Push auf `master`, der
-`package.json` ändert. Er baut das Projekt, erstellt den Git-Tag
+`.github/workflows/release.yml` läuft bei jedem Push (auf jedem Branch),
+der `package.json` ändert. Er baut das Projekt, erstellt den Git-Tag
 `v<version>` und ein GitHub-Release. Enthält die Versionsnummer `beta`,
 wird das Release als **Pre-Release** markiert, sonst als **stabiles
-Release**. Es dürfen daher keine Tags oder Releases manuell erzeugt
-werden — die Versionsnummer in `package.json` steuert alles.
+Release**. Beta-Releases werden von jedem Branch erzeugt; stabile
+Releases erzeugt der Workflow ausschließlich von `master`/`main`. Es
+dürfen daher keine Tags oder Releases manuell erzeugt werden — die
+Versionsnummer in `package.json` steuert alles.
 
 ## Regeln für Versionen und Releases
 
@@ -80,7 +82,7 @@ werden — die Versionsnummer in `package.json` steuert alles.
 
 ```
 Änderung → Version auf JJJJ.M.T-beta.N erhöhen → bauen → committen → pushen
-   (Workflow erzeugt auf master automatisch das Beta-Pre-Release)
+   (Workflow erzeugt direkt auf dem Branch automatisch das Beta-Pre-Release)
 
 Maintainer sagt „Release" → Version auf JJJJ.M.T (ohne beta) setzen
    → bauen → committen → pushen
@@ -91,8 +93,8 @@ Maintainer sagt „Release" → Version auf JJJJ.M.T (ohne beta) setzen
 
 ## Allgemeine Hinweise
 
-- Feature-Arbeit erfolgt auf Branches; der Release-Workflow reagiert nur
-  auf `master`. Die Versionserhöhung gehört trotzdem in den Branch, damit
-  das Release beim Merge automatisch entsteht.
+- Feature-Arbeit erfolgt auf Branches. Beta-Releases entstehen direkt
+  beim Push auf den Branch (sofern `package.json` geändert wurde);
+  stabile Releases entstehen nur durch Push/Merge auf `master`.
 - Commit-Messages klar und beschreibend halten; bei Versionserhöhungen
   die Version in der Message nennen (z.B. `release: 2026.7.5-beta.2`).

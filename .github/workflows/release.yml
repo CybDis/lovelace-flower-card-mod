@@ -1,7 +1,8 @@
 # GitHub Actions Workflow: Automatisches Release-System
 # 
-# Diese Workflow erstellt automatisch ein neues Release wenn die package.json 
-# auf dem master/main Branch geändert wird. Sie besteht aus zwei Jobs:
+# Diese Workflow erstellt automatisch ein neues Release wenn die package.json
+# geändert wird. Beta-Versionen werden von jedem Branch released, stabile
+# Versionen nur von master/main. Sie besteht aus zwei Jobs:
 # 
 # 1. BUILD JOB:
 #    - Prüft ob ein Tag für die aktuelle Version bereits existiert
@@ -19,13 +20,14 @@
 ---
 name: "Auto Release"
 
-# TRIGGER: Workflow startet nur bei Push auf master/main Branch 
-# und nur wenn package.json geändert wurde (Version Update)
+# TRIGGER: Workflow startet bei Push auf jeden Branch,
+# aber nur wenn package.json geändert wurde (Version Update).
+# Beta-Versionen (mit "-beta." im Namen) werden von jedem Branch released,
+# stabile Versionen ausschließlich von master/main.
 on:
   push:
     branches:
-      - 'main'
-      - 'master'
+      - '**'
     paths:
       - 'package.json'
 
@@ -67,7 +69,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: steps.check_tag.outputs.exists == 'true'
- 
+
+      # SCHRITT 4b: Stabile Releases nur von master/main erlauben
+      # Beta-Versionen dürfen von jedem Branch released werden
+      - name: "Cancel if stable version on non-default branch"
+        run: |
+          echo "Stable version ${{ env.COMPONENT_VERSION }} on branch ${{ github.ref_name }}: stable releases are only created from master/main"
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: contains(env.COMPONENT_VERSION, 'beta') == false && github.ref_name != 'master' && github.ref_name != 'main'
+
       # SCHRITT 5: Node.js Umgebung einrichten für Build-Prozess
       - name: "Build using Node.js"
         uses: actions/setup-node@v5
@@ -95,10 +108,12 @@ jobs:
           
       # SCHRITT 9: Änderungen zurück ins Repository pushen
       # Build-Artefakte werden für Release verfügbar gemacht
+      # (explizit auf den auslösenden Branch, nicht nur master)
       - name: "Push changes"
         uses: ad-m/github-push-action@v1.3.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
   
   # =====================================================================
   # AUTO-RELEASE JOB: Erstellt GitHub Release mit Changelog
@@ -118,7 +133,7 @@ jobs:
       - name: "Checkout new code"
         uses: actions/checkout@v5
         with:
-          ref: master  # Explizit master branch um Build-Artefakte zu erhalten
+          ref: ${{ github.ref_name }}  # Auslösender Branch, um die Build-Artefakte aus dem Build-Job zu erhalten
           path: './'
 
       # SCHRITT 2: Version aus package.json extrahieren (erneut nach Build)
