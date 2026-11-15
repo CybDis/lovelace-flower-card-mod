@@ -6,7 +6,7 @@ module.exports = {
     mode: 'production',
     entry: path.resolve(__dirname, 'src', 'flower-card.ts'),
     output: {
-        filename: 'flower-card.js',
+        filename: 'flower-card-mod.js',
         path: path.resolve(__dirname),
     },
     optimization: {

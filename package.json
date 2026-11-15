@@ -1,6 +1,6 @@
 {
-  "name": "flower-card",
-  "version": "2026.7.5",
+  "name": "flower-card-mod",
+  "version": "2026.11.15-beta.1",
   "description": "Custom flower card for https://github.com/Olen/homeassistant-plant",
   "keywords": [
     "home-assistant",
@@ -8,7 +8,7 @@
     "lovelace",
     "custom-cards"
   ],
-  "module": "flower-card.js",
+  "module": "flower-card-mod.js",
   "license": "MIT",
   "private": false,
   "dependencies": {

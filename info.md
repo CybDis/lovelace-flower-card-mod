@@ -1,5 +1,7 @@
 # Flower Card Mod - Enhanced Plant Monitoring for Home Assistant
 
+> **Note:** This mod registers as `custom:flower-card-mod` (file `flower-card-mod.js`) and runs in parallel with the original card shipped by the Plant integration (`/plant/flower-card.js`, `custom:flower-card`).
+
 ## Version 2025.9.3 - Latest Release
 
 The **Flower Card Mod** is an enhanced version of the original Flower Card for Home Assistant, featuring advanced plant monitoring capabilities and modern UI enhancements. This TypeScript-based custom card provides comprehensive plant health visualization with intelligent problem detection and sophisticated battery monitoring.
@@ -49,7 +51,7 @@ The **Flower Card Mod** is an enhanced version of the original Flower Card for H
 │       ├── attributes.ts        # Battery monitoring with stale data detection
 │       ├── constants.ts         # Constants and configuration
 │       └── utils.ts             # General utility functions
-├── flower-card.js               # Compiled output file
+├── flower-card-mod.js               # Compiled output file
 ├── package.json                 # NPM dependencies and scripts
 ├── webpack.config.js            # Build configuration
 ├── tsconfig.json                # TypeScript configuration
@@ -129,7 +131,7 @@ this.plantinfo = await hass.callWS({
 
 ### **YAML Configuration**
 ```yaml
-type: custom:flower-card
+type: custom:flower-card-mod
 entity: plant.my_plant              # Plant entity (required)
 name: "My Plant"                    # Display name (optional)
 battery_sensor: sensor.plant_battery # Battery sensor (optional)
@@ -252,8 +254,8 @@ GitHub Actions automates:
 3. Add to Lovelace resources automatically
 
 ### **Manual Installation**
-1. Download `flower-card.js` from releases
-2. Place in `<config>/www/community/flower-card/`
+1. Download `flower-card-mod.js` from releases
+2. Place in `<config>/www/community/flower-card-mod/`
 3. Add to Lovelace resources manually
 
 ---

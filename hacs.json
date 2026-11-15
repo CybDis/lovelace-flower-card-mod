@@ -1,6 +1,6 @@
 {
     "name": "Flower Card Mod",
     "render_readme": true,
-    "filename": "flower-card.js",
+    "filename": "flower-card-mod.js",
     "homeassistant": "2024.9.0"
 }

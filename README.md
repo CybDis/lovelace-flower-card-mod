@@ -3,6 +3,8 @@
 **This fork of the flower-card** (_originally by Olen_) depends on this Plant component:  
 https://github.com/Olen/homeassistant-plant
 
+> **Note:** This mod registers as `custom:flower-card-mod` (resource `flower-card-mod.js`) and runs in parallel with the original card shipped by the Plant integration (`/plant/flower-card.js`, `custom:flower-card`).
+
 The card can be set up from the GUI (requires version 3.0.0)
 
 ![image](https://github.com/Olen/lovelace-flower-card/assets/203184/a31ad564-9458-41b4-9c1f-9da13f84f2ae)
@@ -33,7 +35,7 @@ Sophisticated battery monitoring with intelligent stale data detection:
 You can also select what bars you want to show for each card
 
 ```yaml
-type: custom:flower-card
+type: custom:flower-card-mod
 entity: plant.my_plant
 name: My Plant
 hide_species: false
@@ -112,14 +114,14 @@ This can be installed manually or through HACS
 * You should not need to restart Home Assistant, but will probably need to refresh the frontend and/or "shift-reload" to refresh the browser cache.
 
 ### Manual Installation
-1: Download the file flower-card.js and add it to somewhere in your `<config>/www/` folder in HA 
+1: Download the file flower-card-mod.js and add it to somewhere in your `<config>/www/` folder in HA 
  
 2: Click your profile picture in the bottom left corner -> Turn on Advanced Mode.
  
 3: Go to Configuration -> Lovelace Dashboards -> Resources -> press the + (lower right corner of screen) and add the following information:
 
 ```yaml
-  Url: /local/<path to>/flower-card.js
+  Url: /local/<path to>/flower-card-mod.js
   Resource type: JavaScript Module
 ```
 ![image](https://user-images.githubusercontent.com/45675902/80322223-ebd41880-8823-11ea-992d-7070d4197f8b.png)
