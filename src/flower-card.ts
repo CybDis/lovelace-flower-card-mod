@@ -19,7 +19,7 @@ console.info(
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
     type: CARD_NAME,
-    name: 'Flower card',
+    name: 'Flower card (mod)',
     preview: true,
     description: 'Custom flower card for https://github.com/Olen/homeassistant-plant',
 });

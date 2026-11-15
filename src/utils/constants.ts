@@ -3,7 +3,7 @@ interface DropdownOption {
     value: string;
 }
 
-export const CARD_NAME = "flower-card";
+export const CARD_NAME = "flower-card-mod";
 
 export const default_show_bars = [
     "moisture"

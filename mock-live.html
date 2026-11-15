@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flower Card — LIVE Mock (real flower-card.js)</title>
+<title>Flower Card — LIVE Mock (real flower-card-mod.js)</title>
 
 <!-- Iconify: provides real MDI SVGs for <ha-icon> (CDN, gets cached) -->
 <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
@@ -56,7 +56,7 @@
 </head>
 <body>
   <h1>🌸 Flower Card — LIVE Mock</h1>
-  <p class="subtitle">Renders the <strong>real built <code>flower-card.js</code></strong> with a stub <code>hass</code> object. Changes to the source appear automatically after <code>npm run dev</code>/<code>build</code>.</p>
+  <p class="subtitle">Renders the <strong>real built <code>flower-card-mod.js</code></strong> with a stub <code>hass</code> object. Changes to the source appear automatically after <code>npm run dev</code>/<code>build</code>.</p>
   <p class="note">HA web components (<code>ha-card</code>, <code>ha-icon</code>, <code>hui-warning</code>) are minimally stubbed. Icons via Iconify CDN.</p>
   <div class="toolbar">
     <button id="themeBtn">🌓 Toggle theme</button>
@@ -122,9 +122,9 @@
 </script>
 
 <!-- ===================================================================
-     2) Load the REAL card (registers <flower-card>)
+     2) Load the REAL card (registers <flower-card-mod>)
 ==================================================================== -->
-<script src="./flower-card.js"></script>
+<script src="./flower-card-mod.js"></script>
 
 <!-- ===================================================================
      3) Build stub hass + instantiate cards
@@ -324,9 +324,9 @@
       label.textContent = c.label;
       wrap.appendChild(label);
 
-      const card = document.createElement("flower-card");
+      const card = document.createElement("flower-card-mod");
       card.setConfig({
-        type: "custom:flower-card",
+        type: "custom:flower-card-mod",
         entity: c.id,
         battery_sensor: c.batt,
         show_bars: ["moisture"],
@@ -338,11 +338,11 @@
     }
   }
 
-  // Make sure <flower-card> is registered before we mount
-  if (customElements.get("flower-card")) {
+  // Make sure <flower-card-mod> is registered before we mount
+  if (customElements.get("flower-card-mod")) {
     mount();
   } else {
-    customElements.whenDefined("flower-card").then(mount);
+    customElements.whenDefined("flower-card-mod").then(mount);
   }
 
   document.getElementById("themeBtn").addEventListener("click", () =>

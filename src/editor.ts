@@ -4,7 +4,7 @@ import { DisplayType, FlowerCardConfig } from "./types/flower-card-types";
 import { default_show_bars, plantAttributes } from "./utils/constants";
 import { HomeAssistant } from "custom-card-helpers";
 
-@customElement('flower-card-editor')
+@customElement('flower-card-mod-editor')
 export class FlowerCardEditor extends LitElement {
     @state() private _hass?: HomeAssistant;
     @state() private _config?: FlowerCardConfig;
