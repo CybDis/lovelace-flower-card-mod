@@ -1,6 +1,6 @@
 {
   "name": "flower-card-mod",
-  "version": "2026.11.15-beta.1",
+  "version": "2026.11.15",
   "description": "Custom flower card for https://github.com/Olen/homeassistant-plant",
   "keywords": [
     "home-assistant",
